@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #060f0c;
+    color: #e2e8f0;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+}
+
+/* Custom Scrollbar for sleek UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #081410;
+}
+::-webkit-scrollbar-thumb {
+  background: #19382e;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #234d3f;
+}
+
+/* Glass Card & Glow Styles */
+.aura-card {
+  background: rgba(10, 23, 19, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(34, 75, 61, 0.35);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease-in-out;
+}
+
+.aura-card:hover {
+  border-color: rgba(0, 229, 153, 0.2);
+  box-shadow: 0 12px 35px -8px rgba(0, 229, 153, 0.08);
+}
+
+.aura-card-hero {
+  background: linear-gradient(135deg, #174235 0%, #0d2820 60%, #091b15 100%);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 1.75rem;
+  box-shadow: 0 15px 40px -12px rgba(0, 229, 153, 0.18);
+}
+
+.glow-pill {
+  box-shadow: 0 0 18px rgba(0, 229, 153, 0.4);
+}
+
+/* Range slider custom thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #00e599;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00e599;
+}

@@ -1,0 +1,1352 @@
+Row 0:
+  Data Source: Daily Questionnaire: anonym_dailyquestionnaire.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 1:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 2:
+  Data Source: nan
+  Variable Name: date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 3:
+  Data Source: nan
+  Variable Name: daily_night_symp
+  Variable Label: Have you had difficulty sleeping because of your asthma symptoms (including cough) in the past 24 hours?
+  Answer Details: Possible values: TRUE = Yes, FALSE = No
+  Data type: Boolean
+  Format: TRUE/FALSE
+----------------------------------------
+Row 4:
+  Data Source: nan
+  Variable Name: daily_day_symp
+  Variable Label: Have you had your usual asthma symptoms during the day (cough, wheeze, chest tightness or breathlessness) in the past 24 hours?
+  Answer Details: Possible values: TRUE = Yes, FALSE = No
+  Data type: Boolean
+  Format: TRUE/FALSE
+----------------------------------------
+Row 5:
+  Data Source: nan
+  Variable Name: daily_limit_activity
+  Variable Label: Has your asthma interfered with your usual activities (for example housework, work or school) in the past 24 hours?
+  Answer Details: Possible values: TRUE = Yes, FALSE = No
+  Data type: Boolean
+  Format: TRUE/FALSE
+----------------------------------------
+Row 6:
+  Data Source: nan
+  Variable Name: daily_prev_inhaler
+  Variable Label: Did you use your asthma preventer inhaler in the past 24 hours?
+  Answer Details: Possible values: 1 = No, I did not take them, 2 = Yes, my usual doses, 3 = Yes, less than my usual doses, 4 = Yes, more than my usual doses, 5 = I'm not sure
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 7:
+  Data Source: nan
+  Variable Name: daily_relief_inhaler
+  Variable Label: How many puffs of your relief inhaler (“blue puffer”) did you have in the past 24 hours?
+  Answer Details: Select from ranges. 0 = None, 1 = 1 to 2, 3 = 3 to 4, 5 = 5 to 8, 9 = 9 to 12, 12 = 12 or more
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 8:
+  Data Source: nan
+  Variable Name: daily_triggers
+  Variable Label: Did you encounter any asthma triggers today?
+  Answer Details: Multiple choice. 
+1 = No, I did not encounter any asthma triggers today
+2 = A cold
+3 = Exercise or being more active than usual
+4 = Strong smells / exhaust fumes
+5 = Mould
+6 = House dust / dust mites
+7 = Feathers
+8 = Dogs / cats / other furry / feathered animals
+9 = Pollen from trees grass or weeds
+10 = Extreme heat
+11 = Extreme cold
+12 = Changes in weather
+13 = Poor air quality
+14 = Someone smoking near me
+15 = Foods
+16 = Around the time of my period
+17 = Feeling sad, angry, excited, tense, stressed
+18 = Laughter
+19 = I am not sure
+20 = Other
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 9:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 10:
+  Data Source: End of Study Questionnaire: anonym_endquestionnaire.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 11:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 12:
+  Data Source: nan
+  Variable Name: completion_date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 13:
+  Data Source: Usability
+  Variable Name: i_think_that_i_would_like_to_use_this_system_frequently
+  Variable Label: I think that I would like to use this system frequently
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 14:
+  Data Source: Usability
+  Variable Name: i_found_the_system_unnecessarily_complex
+  Variable Label: I found the system unnecessarily complex
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 15:
+  Data Source: Usability
+  Variable Name: i_thought_the_system_was_easy_to_use
+  Variable Label: I thought the system was easy to use
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 16:
+  Data Source: Usability
+  Variable Name: i_think_that_i_would_need_the_support_of_a_technical_person_to_be_able_to_use_this_system
+  Variable Label: I think that I would need the support of a technical person to be able to use this system
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 17:
+  Data Source: Usability
+  Variable Name: i_found_the_various_functions_in_this_system_were_well_integrated
+  Variable Label: I found the various functions in this system were well integrated
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 18:
+  Data Source: Usability
+  Variable Name: i_thought_there_was_too_much_inconsistency_in_this_system
+  Variable Label: I thought there was too much inconsistency in this system
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 19:
+  Data Source: Usability
+  Variable Name: i_would_imagine_that_most_people_would_learn_to_use_this_system_very_quickly
+  Variable Label: I would imagine that most people would learn to use this system very quickly
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 20:
+  Data Source: Usability
+  Variable Name: i_found_the_system_very_cumbersome_to_use
+  Variable Label: I found the system very cumbersome to use
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 21:
+  Data Source: Usability
+  Variable Name: i_felt_very_confident_using_the_system
+  Variable Label: I felt very confident using the system
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 22:
+  Data Source: Usability
+  Variable Name: i_needed_to_learn_a_lot_of_things_before_i_could_get_going_with_this_system
+  Variable Label: I needed to learn a lot of things before I could get going with this system
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 23:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_pick_and_choose_my_treatment
+  Variable Label: I should be able to pick and choose my treatment
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 24:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_make_choices_that_improve_my_care
+  Variable Label: I should be able to make choices that improve my care
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 25:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_make_choices_that_positively_impact_my_care
+  Variable Label: I should be able to make choices that positively impact my care
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 26:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_feel_competent_about_my_healthcare
+  Variable Label: I should feel competent about my healthcare
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 27:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_better_manage_my_health
+  Variable Label: I should be able to better manage my health
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 28:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_feel_more_knowledgeable_about_my_health
+  Variable Label: I should feel more knowledgeable about my health
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 29:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_feel_competent_explaining_my_health_to_my_healthcare_provider
+  Variable Label: I should feel competent explaining my health to my healthcare provider
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 30:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_feel_like_i_can_ask_the_right_questions_to_my_healthcare_provider
+  Variable Label: I should feel like I can ask the right questions to my healthcare provider
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 31:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_connect_with_my_healthcare_provider
+  Variable Label: I should be able to connect with my healthcare provider
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 32:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_have_better_interactions_with_my_healthcare_provider
+  Variable Label: I should have better interactions with my healthcare provider
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 33:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_connect_to_healthcare_services_i_need
+  Variable Label: I should be able to connect to healthcare services I need
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 34:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_feel_closer_to_peers_experiencing_my_health_concern
+  Variable Label: I should feel closer to peers experiencing my health concern
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 35:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_set_long_term_goals
+  Variable Label: I should be able to set long-term goals
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 36:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_set_short_term_goals
+  Variable Label: I should be able to set short-term goals
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 37:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_show_my_healthcare_provider_my_progress
+  Variable Label: I should be able to show my healthcare provider my progress
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 38:
+  Data Source: Personal Motivation to Use Technology for Self-Management
+  Variable Name: i_should_be_able_to_visualize_my_progress
+  Variable Label: I should be able to visualize my progress
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 39:
+  Data Source: App Quality and Perceived Impact - Engagement
+  Variable Name: entertainment_the_system_was_fun_entertaining_to_use
+  Variable Label: Entertainment: the system was fun/entertaining to use
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 40:
+  Data Source: App Quality and Perceived Impact - Engagement
+  Variable Name: interest_the_system_was_interesting_to_use_it_presented_its_information_in_an_interesting_way_compared_to_other_similar_apps
+  Variable Label: Interest: the system was interesting to use, it presented its information in an interesting way compared to other similar apps
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 41:
+  Data Source: App Quality and Perceived Impact - Engagement
+  Variable Name: customisation_the_system_allowed_me_to_customise_the_settings_and_preferences_that_i_would_like_to_e_g_sound_content_and_notifications
+  Variable Label: Customisation: the system allowed me to customise the settings and preferences that I would like to (e.g. sound, content and notifications)
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 42:
+  Data Source: App Quality and Perceived Impact - Engagement
+  Variable Name: interactivity_the_system_allows_user_input_provides_feedback_contains_prompts_reminders_sharing_options_notifications_etc
+  Variable Label: Interactivity: the system allows user input, provides feedback, contains prompts (reminders, sharing options, notifications, etc.)
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 43:
+  Data Source: App Quality and Perceived Impact - Engagement
+  Variable Name: target_group_the_system_content_visuals_language_design_was_appropriate_for_the_target_audience
+  Variable Label: Target group: the system content (visuals, language, design) was appropriate for the target audience
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 44:
+  Data Source: App Quality and Perceived Impact - Functionality
+  Variable Name: performance_the_system_features_functions_and_components_buttons_menus_worked_accurately_fast
+  Variable Label: Performance: the system features (functions) and components (buttons/menus) worked accurately/fast
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 45:
+  Data Source: App Quality and Perceived Impact - Functionality
+  Variable Name: ease_of_use_it_was_easy_to_learn_how_to_use_the_system_the_menu_labels_icons_and_instructions_were_clear
+  Variable Label: Ease of use: it was easy to learn how to use the system; the menu labels, icons and instructions were clear
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 46:
+  Data Source: App Quality and Perceived Impact - Functionality
+  Variable Name: navigation_moving_between_screens_made_sense
+  Variable Label: Navigation: moving between screens made sense
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 47:
+  Data Source: App Quality and Perceived Impact - Functionality
+  Variable Name: gestural_design_the_taps_swipes_pinches_scrolls_made_sense_they_were_consistent_across_all_components_screens
+  Variable Label: Gestural design: the taps/swipes/pinches/scrolls made sense; they were consistent across all components/screens
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 48:
+  Data Source: App Quality and Perceived Impact - Aesthetics
+  Variable Name: layout_the_arrangement_and_size_of_buttons_icons_menus_and_content_on_the_screen_were_appropriate
+  Variable Label: Layout: the arrangement and size of buttons, icons, menus, and content on the screen were appropriate
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 49:
+  Data Source: App Quality and Perceived Impact - Aesthetics
+  Variable Name: graphics_there_were_high_quality_resolution_of_graphics_used_for_buttons_icons_menus_and_content
+  Variable Label: Graphics: there were high quality/resolution of graphics used for buttons, icons, menus and content
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 50:
+  Data Source: App Quality and Perceived Impact - Aesthetics
+  Variable Name: visual_appeal_the_system_looks_good
+  Variable Label: Visual appeal: the system looks good
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 51:
+  Data Source: App Quality and Perceived Impact - Information
+  Variable Name: quality_of_information_the_system_content_was_correct_well_written_and_relevant_to_the_goal_topic_of_the_system
+  Variable Label: Quality of information: the system content was correct, well written, and relevant to the goal/topic of the system
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 52:
+  Data Source: App Quality and Perceived Impact - Information
+  Variable Name: quantity_of_information_the_information_within_the_system_was_comprehensive_but_concise
+  Variable Label: Quantity of information: the information within the system was comprehensive but concise
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 53:
+  Data Source: App Quality and Perceived Impact - Information
+  Variable Name: visual_information_the_visual_explanation_of_concepts_through_charts_graphs_images_videos_etc_was_clear_logical_correct
+  Variable Label: Visual information: the visual explanation of concepts through charts/graphs/images/videos, etc. was clear, logical, correct
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 54:
+  Data Source: App Quality and Perceived Impact - Information
+  Variable Name: credibility_of_source_the_information_within_the_system_seemed_to_come_from_a_credible_source
+  Variable Label: Credibility of source: the information within the system seemed to come from a credible source
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 55:
+  Data Source: App Quality and Perceived Impact - App subjective quality
+  Variable Name: i_would_recommend_this_system_to_people_who_might_benefit_from_it
+  Variable Label: I would recommend this system to people who might benefit from it
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 56:
+  Data Source: App Quality and Perceived Impact - App subjective quality
+  Variable Name: how_many_times_do_you_think_you_would_use_this_system_in_the_next_12_months_if_it_was_relevant_to_you
+  Variable Label: How many times do you think you would use this system in the next 12 months if it was relevant to you?
+  Answer Details: Possible values: (1) None, (2) 1-2, (3) 3-10, (4) 10-50, (5) >50
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 57:
+  Data Source: App Quality and Perceived Impact - App subjective quality
+  Variable Name: i_would_pay_for_this_system
+  Variable Label: I would pay for this system
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 58:
+  Data Source: App Quality and Perceived Impact - App subjective quality
+  Variable Name: what_is_your_overall_star_rating_of_the_system_out_of_5
+  Variable Label: What is your overall (star) rating of the system (out of 5)?
+  Answer Details: Stars rating, possible values: 1 star, 2 stars, 3 stars, 4 stars, 5 stars
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 59:
+  Data Source: App Quality and Perceived Impact - Perceived impact
+  Variable Name: awareness_a_this_study_has_increased_my_awareness_of_the_importance_of_addressing_the_health_behaviour
+  Variable Label: Awareness - This study has increased my awareness of the importance of addressing the health behaviour
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 60:
+  Data Source: App Quality and Perceived Impact - Perceived impact
+  Variable Name: knowledge_a_this_study_has_increased_my_knowledge_understanding_of_the_health_behaviour
+  Variable Label: Knowledge - This study has increased my knowledge/understanding of the health behaviour
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 61:
+  Data Source: App Quality and Perceived Impact - Perceived impact
+  Variable Name: attitudes_a_the_study_has_changed_my_attitudes_toward_improving_this_health_behaviour
+  Variable Label: Attitudes - The study has changed my attitudes toward improving this health behaviour
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 62:
+  Data Source: App Quality and Perceived Impact - Perceived impact
+  Variable Name: intention_to_change_a_the_study_has_increased_my_intentions_motivation_to_address_this_health_behaviour
+  Variable Label: Intention to change - The study has increased my intentions/motivation to address this health behaviour
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 63:
+  Data Source: App Quality and Perceived Impact - Perceived impact
+  Variable Name: help_seeking_a_this_app_would_encourage_me_to_seek_further_help_to_address_the_health_behaviour_if_i_needed_it
+  Variable Label: Help seeking - This app would encourage me to seek further help to address the health behaviour (if I needed it)
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 64:
+  Data Source: App Quality and Perceived Impact - Perceived impact
+  Variable Name: behaviour_change_a_use_of_this_app_will_increase_decrease_the_health_behaviour
+  Variable Label: Behaviour change - Use of this app will increase/decrease the health behaviour
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 65:
+  Data Source: General
+  Variable Name: i_would_pay_for_the_find_air_one_rrp_59_00_eur_per_year
+  Variable Label: I would pay for the FindAir ONE (RRP 59.00 EUR per year)
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 66:
+  Data Source: General
+  Variable Name: i_would_pay_for_the_smart_asthma_smart_peak_flow_meter_rrp_59_60_gbp
+  Variable Label: I would pay for the Smart Asthma smart peak flow meter (RRP 59.60 GBP)
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 67:
+  Data Source: General
+  Variable Name: i_would_pay_for_the_mi_band_3_smartwatch_rrp_25_00_gbp
+  Variable Label: I would pay for the Mi Band 3 smartwatch (RRP 25.00 GBP)
+  Answer Details: 5-Point Likert Scale
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 68:
+  Data Source: General
+  Variable Name: i_had_received_training_in_taking_peak_flow_measurements_with_a_peak_flow_meter_from_a_healthcare_professional_e_g_asthma_doctor_nurse_pharmacist_etc_prior_to_joining_this_study
+  Variable Label: I had received training in taking peak flow measurements with a peak flow meter from a healthcare professional (e.g. asthma doctor, nurse, pharmacist, etc.) prior to joining this study
+  Answer Details: Possible values: Yes, No, Not sure
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 69:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 70:
+  Data Source: Environment: anonym_environment.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 71:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 72:
+  Data Source: nan
+  Variable Name: date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 73:
+  Data Source: nan
+  Variable Name: temperature
+  Variable Label: Temperature
+  Answer Details: Measured in degree Celsius
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 74:
+  Data Source: nan
+  Variable Name: temperature_min
+  Variable Label: Minimum temperature at the moment. This is minimal currently observed temperature (within large megalopolises and urban areas)
+  Answer Details: Measured in degree Celsius
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 75:
+  Data Source: nan
+  Variable Name: temperature_max
+  Variable Label: Maximum temperature at the moment. This is maximal currently observed temperature (within large megalopolises and urban areas)
+  Answer Details: Measured in degree Celsius
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 76:
+  Data Source: nan
+  Variable Name: pressure
+  Variable Label:  Atmospheric pressure (on the sea level, if there is no sea_level or grnd_level data)
+  Answer Details: Measured in hPa
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 77:
+  Data Source: nan
+  Variable Name: humidity
+  Variable Label: Humidity
+  Answer Details: Measured in %
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 78:
+  Data Source: nan
+  Variable Name: wind_speed
+  Variable Label: Wind speed
+  Answer Details: Measured in meter/sec
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 79:
+  Data Source: nan
+  Variable Name: wind_deg
+  Variable Label: Wind direction
+  Answer Details: Measured in degrees (meteorological)
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 80:
+  Data Source: nan
+  Variable Name: aqi
+  Variable Label: Air Quality Index
+  Answer Details: Possible values: 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 81:
+  Data Source: nan
+  Variable Name: co
+  Variable Label: Сoncentration of CO (Carbon monoxide)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 82:
+  Data Source: nan
+  Variable Name: no
+  Variable Label: Сoncentration of NO (Nitrogen monoxide)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 83:
+  Data Source: nan
+  Variable Name: no2
+  Variable Label: Сoncentration of NO2 (Nitrogen dioxide)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 84:
+  Data Source: nan
+  Variable Name: o3
+  Variable Label: Сoncentration of O3 (Ozone)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 85:
+  Data Source: nan
+  Variable Name: so2
+  Variable Label: Сoncentration of SO2 (Sulphur dioxide)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 86:
+  Data Source: nan
+  Variable Name: pm2_5
+  Variable Label: Сoncentration of PM2.5 (Fine particles matter)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 87:
+  Data Source: nan
+  Variable Name: pm10
+  Variable Label: Сoncentration of PM10 (Coarse particulate matter)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 88:
+  Data Source: nan
+  Variable Name: nh3
+  Variable Label: Сoncentration of NH3 (Ammonia)
+  Answer Details: Measured in μg/m3
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 89:
+  Data Source: nan
+  Variable Name: grass_pollen
+  Variable Label: Level of pollen grains from grass
+  Answer Details: Possible values: Low = 0-29 particles/m3, Moderate = 30-60 particles/m3, High = 61-341 particles/m3, Very high = 342+ particles/m3
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 90:
+  Data Source: nan
+  Variable Name: tree_pollen
+  Variable Label: Level of pollen grains from trees
+  Answer Details: Possible values: Low = 0-95 particles/m3, Moderate = 96-207 particles/m3, High = 208-703 particles/m3, Very high = 704+ particles/m3
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 91:
+  Data Source: nan
+  Variable Name: weed_pollen
+  Variable Label: Level of pollen grains from weeds
+  Answer Details: Possible values: Low = 0-20 particles/m3, Moderate = 21-77 particles/m3, High = 78-266 particles/m3, Very high = 267+ particles/m3
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 92:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 93:
+  Data Source: Patient Information: anonym_patient_info.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 94:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 95:
+  Data Source: nan
+  Variable Name: sex
+  Variable Label: Sex
+  Answer Details: Possible values: Female, Male
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 96:
+  Data Source: nan
+  Variable Name: age_range
+  Variable Label: Age of participant, age range
+  Answer Details: Calculated at the end of the study. Possible values: 18-29yo, 30-39yo, 40-49yo, 50+yo
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 97:
+  Data Source: nan
+  Variable Name: bmi_range
+  Variable Label: BMI range
+  Answer Details: Possible values: Underweight = <18.5, Normal = 18.5 to 25 , Pre-obesity = 25 to 30, Obesity = >30
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 98:
+  Data Source: nan
+  Variable Name: age_diagnosed_range
+  Variable Label: How old were you when first diagnosed with asthma, or when you had your first symptoms?
+  Answer Details: Summarised as age ranges. Possible values: 0-6yo, 7-11yo, 12-18yo, 19+yo
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 99:
+  Data Source: nan
+  Variable Name: max_pef_expected
+  Variable Label: Theoretical maximum PEF
+  Answer Details: Calculated using age, height, and sex. Rounded to nearest 5 L/min
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 100:
+  Data Source: nan
+  Variable Name: smoker
+  Variable Label: What is your smoking status?
+  Answer Details: Possible values: Never (<100 cigarettes in lifetime), Current, Previous
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 101:
+  Data Source: nan
+  Variable Name: pack_years
+  Variable Label: Lifetime pack years of cigarettes
+  Answer Details: "Never" smokers have assumed 0 pack years
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 102:
+  Data Source: nan
+  Variable Name: race
+  Variable Label: What is your ethnic group?
+  Answer Details: Possible values: Asian/Asian British, Black/African/Caribbean/Black British, Mixed/multiple ethnic groups, White, Other ethnic group
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 103:
+  Data Source: nan
+  Variable Name: severity
+  Variable Label: Do you think of your asthma as:
+  Answer Details: Possible values: Very mild, Mild, Moderate, Severe, Very severe
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 104:
+  Data Source: nan
+  Variable Name: pef_best
+  Variable Label: What is your personal best peak flow (PEF) measurement?
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 105:
+  Data Source: nan
+  Variable Name: n_inhalers
+  Variable Label: How many different relief inhalers (“blue puffer”) do you use on a regular basis?
+  Answer Details: nan
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 106:
+  Data Source: nan
+  Variable Name: region
+  Variable Label: UK regions
+  Answer Details: Possible values: Northern Ireland, Scotland, Wales, London, North East, North West, Yorkshire, East Midlands, West Midlands, South East, East of England, South West 
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 107:
+  Data Source: nan
+  Variable Name: nation
+  Variable Label: UK nations
+  Answer Details: Possible values: England, Northern Ireland, Scotland, Wales
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 108:
+  Data Source: nan
+  Variable Name: phase2_start
+  Variable Label: Day of phase 2 start
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 109:
+  Data Source: nan
+  Variable Name: daily_start_date
+  Variable Label: Day of first daily questionnaire completion
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 110:
+  Data Source: nan
+  Variable Name: weekly_start_date
+  Variable Label: Day of first weekly questionnaire completion
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 111:
+  Data Source: nan
+  Variable Name: miband_start_date
+  Variable Label: Day of first smartwatch data
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 112:
+  Data Source: nan
+  Variable Name: position_start_date
+  Variable Label: Day of first position task completion
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 113:
+  Data Source: nan
+  Variable Name: pef_start_date
+  Variable Label: Day of first PEF measurement
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 114:
+  Data Source: nan
+  Variable Name: inhaler_start_date
+  Variable Label: Day of first smart inhaler record
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 115:
+  Data Source: nan
+  Variable Name: daily_end_date
+  Variable Label: Day of final daily questionnaire completion
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 116:
+  Data Source: nan
+  Variable Name: weekly_end_date
+  Variable Label: Day of final weekly questionnaire completion
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 117:
+  Data Source: nan
+  Variable Name: miband_end_date
+  Variable Label: Day of final smartwatch data
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 118:
+  Data Source: nan
+  Variable Name: position_end_date
+  Variable Label: Day of final position task completion
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 119:
+  Data Source: nan
+  Variable Name: pef_end_date
+  Variable Label: Day of final PEF measurement
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 120:
+  Data Source: nan
+  Variable Name: inhaler_end_date
+  Variable Label: Day of final smart inhaler record
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 121:
+  Data Source: nan
+  Variable Name: phase2_end
+  Variable Label: Day of final phase 2 engagement
+  Answer Details: Measured in days after starting phase 2 of the AAMOS-00 study
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 122:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 123:
+  Data Source: Peakflow: anonym_peakflow.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 124:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 125:
+  Data Source: nan
+  Variable Name: date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 126:
+  Data Source: nan
+  Variable Name: hour
+  Variable Label: Hour of the day the measurement was taken
+  Answer Details: Hour range from 0 to 23
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 127:
+  Data Source: nan
+  Variable Name: pef_max
+  Variable Label: The maximum PEF out of three PEF measurements taken
+  Answer Details: Measured in L/min
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 128:
+  Data Source: nan
+  Variable Name: pefs
+  Variable Label: List of three PEF measurements taken
+  Answer Details: Measured in L/min
+  Data type: String
+  Format: NNN|NNN|NNN
+----------------------------------------
+Row 129:
+  Data Source: nan
+  Variable Name: morning
+  Variable Label: Morning or evening task
+  Answer Details: Possible values: TRUE = Morning (5am - 3pm), FALSE = evening (3pm - 5am)
+  Data type: Boolean
+  Format: TRUE/FALSE
+----------------------------------------
+Row 130:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 131:
+  Data Source: Smart Inhaler: anonym_smartinhaler.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 132:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 133:
+  Data Source: nan
+  Variable Name: date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 134:
+  Data Source: nan
+  Variable Name: hour
+  Variable Label: Hour of the day the measurement was taken
+  Answer Details: Hour range from 0 to 23
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 135:
+  Data Source: nan
+  Variable Name: name
+  Variable Label: Name of relief medication taken
+  Answer Details: nan
+  Data type: String
+  Format: Variable length field
+----------------------------------------
+Row 136:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 137:
+  Data Source: Smartwatch: anonym_smartwatch1.csv (contains entries 1-1,000,000), anonym_smartwatch2.csv (contains entries 1,000,001-2,000,000), anonym_smartwatch3.csv (contains entries 2,000,001-2,101,829). Split into three files to accomodate the maximum data readable with Excel
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 138:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 139:
+  Data Source: nan
+  Variable Name: date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 140:
+  Data Source: nan
+  Variable Name: time
+  Variable Label: Time of day
+  Answer Details: nan
+  Data type: Time
+  Format: HH:MM:SS
+----------------------------------------
+Row 141:
+  Data Source: nan
+  Variable Name: activity_type
+  Variable Label: Activity type detected by MiBand3
+  Answer Details: Values:
+1 = walk
+16 = walk
+33 = walk
+3 = not_worn
+6 = charging
+80 = sedentary
+90 = sedentary
+89 = sedentary
+91 = sedentary
+92 = sedentary
+96 = sedentary
+66 = running
+98 = running
+82 = running
+17 = activity_high
+106 = sleep
+112 = sleep
+121 = sleep
+122 = sleep
+123 = sleep
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 142:
+  Data Source: nan
+  Variable Name: intensity
+  Variable Label: Intensity of activity
+  Answer Details: nan
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 143:
+  Data Source: nan
+  Variable Name: steps
+  Variable Label: Steps
+  Answer Details: Steps taken over 1 minute
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 144:
+  Data Source: nan
+  Variable Name: hr
+  Variable Label: Heart rate
+  Answer Details: Average heart rate over 1 minute. Measured in BPM
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 145:
+  Data Source: nan
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 146:
+  Data Source: Weekly Questionnaire: anonym_weeklyquestionnaire.csv
+  Variable Name: nan
+  Variable Label: nan
+  Answer Details: nan
+  Data type: nan
+  Format: nan
+----------------------------------------
+Row 147:
+  Data Source: nan
+  Variable Name: user_key
+  Variable Label: Pseudo user key
+  Answer Details: nan
+  Data type: Numeric
+  Format: NNN
+----------------------------------------
+Row 148:
+  Data Source: nan
+  Variable Name: date
+  Variable Label: Days after starting phase 2 of the AAMOS-00 study
+  Answer Details: Daily study activities ranged from day 0 to day 184
+  Data type: Numeric
+  Format: Variable length field
+----------------------------------------
+Row 149:
+  Data Source: nan
+  Variable Name: weekly_night_symp
+  Variable Label: How many days over the last week have you had difficulty sleeping because of your asthma symptoms (including cough)?
+  Answer Details: Integer from 0 to 7
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 150:
+  Data Source: nan
+  Variable Name: weekly_day_symp
+  Variable Label: How many days over the last week have you had your usual asthma symptoms during the day (cough, wheeze, chest tightness or breathlessness)?
+  Answer Details: Integer from 0 to 7
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 151:
+  Data Source: nan
+  Variable Name: weekly_limit_activity
+  Variable Label: How many days over the last week has your asthma interfered with your usual activities (e.g. housework, work, school, etc)?
+  Answer Details: Integer from 0 to 7
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 152:
+  Data Source: nan
+  Variable Name: weekly_short_breath
+  Variable Label: Which of the following statement best describes how often you had experienced a shortness of breath due to your asthma in the last seven days?
+  Answer Details: Possible values:
+1 = I did not experience any shortness of breath due to my asthma
+2 = I sometimes had a shortness of breath due to my asthma
+3 = I had a moderate amount of shortness of breath due to my asthma
+4 = I often had a shortness of breath due to my asthma
+5 = I had a shortness of breath due to my asthma all the time
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 153:
+  Data Source: nan
+  Variable Name: weekly_wheeze
+  Variable Label: Which of the following statement best describes how often you had experienced wheezing due to your asthma in the last seven days?
+  Answer Details: Possible values:
+1 = I did not wheeze due to my asthma
+2 = I sometimes wheezed due to my asthma
+3 = I had a moderate amount of wheezing due to my asthma
+4 = I often wheezed due to my asthma
+5 = I was wheezing all the time due to my asthma
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 154:
+  Data Source: nan
+  Variable Name: weekly_relief_inhaler
+  Variable Label: Which of the following statement best describes your average daily total puffs of your relief inhaler (“blue puffer”), except for use before exercise, in the last seven days?
+  Answer Details: Possible values:
+1 = I had not used my relief inhaler
+2 = I had 1 – 2 puffs of my relief inhaler
+3 = I had 3 – 4 puffs of my relief inhaler
+4 = I had 5 – 8 puffs of my relief inhaler
+5 = I had 9 – 12 puffs of my relief inhaler
+6 = I had 12 or more puffs of my relief inhaler
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 155:
+  Data Source: nan
+  Variable Name: weekly_doc
+  Variable Label: Did you visit a general practice (GP) or asthma doctor, not including regular visits regarding your asthma in the past week?
+  Answer Details: Multiple choice. Possible values:
+0 = No
+-1 = Yesterday
+-2 = 2 days ago
+-3 = 3 days ago
+-4 = 4 days ago
+-5 = 5 days ago
+-6 = 6 days ago
+-7 = 7 days ago
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 156:
+  Data Source: nan
+  Variable Name: weekly_hospital
+  Variable Label: Were you hospitalised due to your asthma in the past week?
+  Answer Details: Multiple choice. Possible values:
+0 = No
+-1 = Yesterday
+-2 = 2 days ago
+-3 = 3 days ago
+-4 = 4 days ago
+-5 = 5 days ago
+-6 = 6 days ago
+-7 = 7 days ago
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 157:
+  Data Source: nan
+  Variable Name: weekly_er
+  Variable Label: Did you visit an emergency room (ER) for your asthma in the past week?
+  Answer Details: Multiple choice. Possible values:
+0 = No
+-1 = Yesterday
+-2 = 2 days ago
+-3 = 3 days ago
+-4 = 4 days ago
+-5 = 5 days ago
+-6 = 6 days ago
+-7 = 7 days ago
+  Data type: Numeric
+  Format: N
+----------------------------------------
+Row 158:
+  Data Source: nan
+  Variable Name: weekly_oral
+  Variable Label: Did you use systemic corticosteroids (Prednisone, etc.) in the past week?
+  Answer Details: Possible values: 1 = No, 2 = Yes, but no more than usual, 3 = Yes, more than usual, 4 = I'm not sure
+  Data type: Numeric
+  Format: N
+----------------------------------------

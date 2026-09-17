@@ -1,0 +1,28 @@
+# Environment variables & secrets (keep .env.example tracked)
+.env
+backend/.env
+
+# Python bytecode & cache
+__pycache__/
+backend/__pycache__/
+*.py[cod]
+*$py.class
+
+# ML training logs & caches
+catboost_info/
+
+# Frontend dependencies and build artifacts
+frontend/node_modules/
+frontend/dist/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
