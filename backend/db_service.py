@@ -570,6 +570,8 @@ class DatabaseService:
         Authenticates user with constant-time password hash verification.
         """
         email_clean = email.strip().lower()
+
+        # 1. Check PostgreSQL if configured
         if self.use_postgres:
             try:
                 with self.get_connection() as conn:
@@ -580,24 +582,33 @@ class DatabaseService:
                             user_info = {k: v for k, v in user_row.items() if k != 'password_hash'}
                             return {"success": True, "user": self._enrich_user_role(user_info)}
             except Exception as e:
-                print(f"[DB Service] Login error: {e}")
-        elif self.base_url:
-            with httpx.Client(timeout=10.0) as client:
-                res = client.get(
-                    f"{self.base_url}/user_profiles",
-                    headers=HEADERS,
-                    params={"email": f"eq.{email_clean}", "select": "*"}
-                )
-                if res.status_code == 200 and len(res.json()) > 0:
-                    user_row = res.json()[0]
-                    if verify_password(password, user_row['password_hash']):
-                        user_info = {k: v for k, v in user_row.items() if k != 'password_hash'}
-                        return {"success": True, "user": self._enrich_user_role(user_info)}
+                print(f"[DB Service] PostgreSQL login error: {e}")
 
-        # Check in-memory resilient session store
+        # 2. Check Supabase REST API
+        if self.base_url:
+            try:
+                with httpx.Client(timeout=10.0) as client:
+                    # Query with case-insensitive match (ilike)
+                    res = client.get(
+                        f"{self.base_url}/user_profiles",
+                        headers=HEADERS,
+                        params={"email": f"ilike.{email_clean}", "select": "*"}
+                    )
+                    if res.status_code == 200:
+                        rows = res.json()
+                        for user_row in rows:
+                            pwd_hash = user_row.get('password_hash', '')
+                            if verify_password(password, pwd_hash):
+                                user_info = {k: v for k, v in user_row.items() if k != 'password_hash'}
+                                return {"success": True, "user": self._enrich_user_role(user_info)}
+            except Exception as e:
+                print(f"[DB Service] Supabase REST login error: {e}")
+
+        # 3. Check in-memory resilient session store
         if email_clean in self._in_memory_users:
             user_row = self._in_memory_users[email_clean]
-            if verify_password(password, user_row['password_hash']):
+            pwd_hash = user_row.get('password_hash', '')
+            if verify_password(password, pwd_hash):
                 user_info = {k: v for k, v in user_row.items() if k != 'password_hash'}
                 return {"success": True, "user": self._enrich_user_role(user_info)}
 
@@ -650,17 +661,20 @@ class DatabaseService:
                             return self._enrich_user_role(user_info)
             except Exception as e:
                 print(f"[DB Service] Error fetching user by email: {e}")
-        elif self.base_url:
-            with httpx.Client(timeout=10.0) as client:
-                res = client.get(
-                    f"{self.base_url}/user_profiles",
-                    headers=HEADERS,
-                    params={"email": f"eq.{email_clean}", "select": "*"}
-                )
-                if res.status_code == 200 and len(res.json()) > 0:
-                    user_row = res.json()[0]
-                    user_info = {k: v for k, v in user_row.items() if k != 'password_hash'}
-                    return self._enrich_user_role(user_info)
+        if self.base_url:
+            try:
+                with httpx.Client(timeout=10.0) as client:
+                    res = client.get(
+                        f"{self.base_url}/user_profiles",
+                        headers=HEADERS,
+                        params={"email": f"ilike.{email_clean}", "select": "*"}
+                    )
+                    if res.status_code == 200 and len(res.json()) > 0:
+                        user_row = res.json()[0]
+                        user_info = {k: v for k, v in user_row.items() if k != 'password_hash'}
+                        return self._enrich_user_role(user_info)
+            except Exception as e:
+                print(f"[DB Service] Supabase REST get_user_by_email error: {e}")
 
         # Check in-memory resilient session store
         if email_clean in self._in_memory_users:

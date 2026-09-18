@@ -148,26 +148,45 @@ def validate_password_strength(password: str) -> Tuple[bool, Optional[str]]:
 
 def hash_password(password: str) -> str:
     """Hashes password using bcrypt with work factor 12."""
-    return pwd_context.hash(password)
+    try:
+        import bcrypt
+        salt = bcrypt.gensalt(rounds=12)
+        return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+    except Exception:
+        return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verifies a password against stored hash.
-    Supports bcrypt and legacy pbkdf2 hashes with constant-time check.
+    Supports native bcrypt ($2b$, $2a$, $2y$), passlib, and legacy pbkdf2 hashes with constant-time check.
     """
     if not hashed_password or not plain_password:
         return False
+
+    # 1. Direct native bcrypt check (C/Rust binding, completely immune to passlib bugs)
+    if hashed_password.startswith(("$2b$", "$2a$", "$2y$")):
+        try:
+            import bcrypt
+            return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+        except Exception as e:
+            print(f"[Auth] Native bcrypt error: {e}")
+
+    # 2. Passlib CryptContext fallback
     try:
-        # Check if bcrypt
-        if hashed_password.startswith("$2b$") or hashed_password.startswith("$2a$"):
+        if hashed_password.startswith(("$2b$", "$2a$", "$2y$")):
             return pwd_context.verify(plain_password, hashed_password)
-        # Check if legacy pbkdf2 (salt$hash)
-        if "$" in hashed_password:
+    except Exception:
+        pass
+
+    # 3. Legacy pbkdf2 format (salt$hash)
+    try:
+        if "$" in hashed_password and not hashed_password.startswith("$"):
             salt, key_hex = hashed_password.split("$", 1)
             computed = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt.encode("utf-8"), 100000)
             return secrets.compare_digest(computed.hex(), key_hex)
     except Exception:
-        return False
+        pass
+
     return False
 
 # ==============================================================================
