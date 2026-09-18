@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -172,7 +172,9 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
   }, []);
 
   // Compute ONLY the closest 5 hospitals dynamically
-  const sortedHospitals = getNearbyHospitalsSorted(activeLocation.lat, activeLocation.lon);
+  const sortedHospitals = useMemo(() => {
+    return getNearbyHospitalsSorted(activeLocation.lat, activeLocation.lon);
+  }, [activeLocation.lat, activeLocation.lon]);
   const displayedHospitals = sortedHospitals.slice(0, 5);
 
   // Update map center, user pin, multiple risk circles, and the 5 closest hospitals
@@ -292,7 +294,7 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
             <div style="font-size: 10px; color: #cbd5e1; margin-bottom: 6px;">
               Ambulance: <a href="tel:${hosp.ambulance}" style="color: #f87171; text-decoration: none; font-weight: bold;">${hosp.ambulance}</a>
             </div>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${hosp.lat},${hosp.lon}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 6px 0; background: #00e599; color: #062319; font-size: 10px; font-weight: bold; border-radius: 6px; text-decoration: none;">
+            <a href="https://www.google.com/maps/dir/?api=1&origin=${activeLocation.lat},${activeLocation.lon}&destination=${hosp.lat},${hosp.lon}&travelmode=driving" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 6px 0; background: #00e599; color: #062319; font-size: 10px; font-weight: bold; border-radius: 6px; text-decoration: none;">
               Get Directions ↗
             </a>
           </div>
@@ -380,12 +382,29 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
     });
   };
 
-  // Refresh satellite telemetry
+  // Refresh Open-Meteo telemetry (forces fresh live API call & syncs to backend)
   const handleRefresh = async () => {
     setLoading(true);
     try {
-      const data = await fetchSatelliteAirAndWeather(activeLocation.lat, activeLocation.lon);
-      setSatelliteData(data);
+      const data = await fetchSatelliteAirAndWeather(activeLocation.lat, activeLocation.lon, true);
+      if (data) {
+        setSatelliteData(data);
+        saveSatelliteEnvironmentData({
+          location_name: activeLocation.displayName,
+          latitude: activeLocation.lat,
+          longitude: activeLocation.lon,
+          outdoor_temperature: data.weather?.temperature,
+          outdoor_humidity: data.weather?.humidity,
+          pm10: data.airQuality?.pm10,
+          pm2_5: data.airQuality?.pm2_5,
+          ozone: data.airQuality?.ozone,
+          nitrogen_dioxide: data.airQuality?.nitrogenDioxide,
+          carbon_monoxide: data.airQuality?.carbonMonoxide,
+          sulphur_dioxide: data.airQuality?.sulphurDioxide,
+          uv_index: data.airQuality?.uvIndex,
+          aqi: data.airQuality?.usAqi
+        });
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -416,7 +435,7 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold text-emerald-300">Live Satellite Feed</span>
+              <span className="text-xs font-semibold text-emerald-300">Live Open-Meteo Feed</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Air Quality & Hospital Map
@@ -452,7 +471,7 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
               onClick={handleRefresh}
               disabled={loading}
               className="p-2 rounded-xl bg-forest-900/90 hover:bg-forest-800 text-slate-300 hover:text-white border border-forest-700 transition cursor-pointer"
-              title="Refresh satellite telemetry"
+              title="Refresh Open-Meteo telemetry"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -704,7 +723,7 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
                         Click card to view pin
                       </span>
                       <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${hosp.lat},${hosp.lon}`}
+                        href={`https://www.google.com/maps/dir/?api=1&origin=${activeLocation.lat},${activeLocation.lon}&destination=${hosp.lat},${hosp.lon}&travelmode=driving`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -747,14 +766,14 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
       </div>
 
       {/* ==================================================================== */}
-      {/* 3. INDOOR (ESP32) VS OUTDOOR (SATELLITE) COMPARISON */}
+      {/* 3. INDOOR (ESP32) VS OUTDOOR (OPEN-METEO) COMPARISON */}
       {/* ==================================================================== */}
       <div className="aura-card p-5 sm:p-6 border border-emerald-500/25">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-400" />
             <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
-              Indoor IoT vs Outdoor Satellite Telemetry
+              Indoor IoT vs Outdoor Open-Meteo Telemetry
             </h3>
           </div>
           <span className="text-[11px] font-mono text-slate-400">
@@ -778,7 +797,7 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
                 <span className="text-[9px] text-slate-500 block">µg/m³</span>
               </div>
               <div className="p-2 rounded-xl bg-forest-900/80 border border-forest-800">
-                <span className="text-[9px] text-slate-400 block">Outdoor (Satellite)</span>
+                <span className="text-[9px] text-slate-400 block">Outdoor (Open-Meteo)</span>
                 <span className="text-base font-black font-mono text-white">{outdoorPM25}</span>
                 <span className="text-[9px] text-slate-500 block">µg/m³</span>
               </div>
@@ -849,13 +868,13 @@ export default function AirMapPage({ realtimeTelemetry, currentUser }) {
       </div>
 
       {/* ==================================================================== */}
-      {/* 4. SATELLITE POLLUTANT BREAKDOWN */}
+      {/* 4. OPEN-METEO POLLUTANT BREAKDOWN */}
       {/* ==================================================================== */}
       {satelliteData?.airQuality && (
         <div className="aura-card p-5 sm:p-6 border border-emerald-500/25">
           <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-xs sm:text-sm font-bold text-white tracking-tight">
-              Satellite Atmospheric Pollutant Breakdown
+              Open-Meteo Atmospheric Pollutant Breakdown
             </h3>
             <span className="text-[10px] text-slate-400 font-mono">
               {activeLocation.lat.toFixed(3)}, {activeLocation.lon.toFixed(3)}

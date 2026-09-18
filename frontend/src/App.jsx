@@ -35,13 +35,14 @@ import {
   fetchHistory, 
   fetchAlerts, 
   fetchLatestTelemetry,
+  subscribeTelemetryStream,
   predictAndExplain,
   fetchMessages
 } from './api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [timeframe, setTimeframe] = useState('weekly');
+  const [timeframe, setTimeframe] = useState('live');
   
   // Auth state (Strict Authentication Gate)
   const [currentUser, setCurrentUser] = useState(() => {
@@ -148,20 +149,49 @@ export default function App() {
     initDashboard();
   }, [timeframe, currentUser?.id]);
 
-  // 2. Real-Time Telemetry Polling (Every 3 seconds)
+  // 2. Real-Time Telemetry Stream via SSE with Automatic Polling Fallback
   useEffect(() => {
     if (!currentUser) return;
 
-    const interval = setInterval(async () => {
-      const latest = await fetchLatestTelemetry();
-      if (latest) {
-        setIsEsp32Connected(Boolean(latest.is_esp32_connected));
-        if (latest.telemetry) {
-          setRealtimeTelemetry(latest.telemetry);
-          
-          // Compute 2-stage ML prediction tailored to active logged-in user profile
+    let isPolling = false;
+    let pollInterval = null;
+
+    const handleIncomingPacket = async (data) => {
+      if (!data) return;
+      setIsEsp32Connected(Boolean(data.is_esp32_connected));
+      if (data.telemetry) {
+        setRealtimeTelemetry(data.telemetry);
+
+        // Dynamically append new live point to historyData so the overview chart updates in real-time
+        setHistoryData(prev => {
+          if (!prev) return prev;
+          const now = new Date();
+          const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+          const lastPoint = prev[prev.length - 1];
+          if (lastPoint && lastPoint.seq_num === data.telemetry.seq_num) {
+            return prev;
+          }
+          const newPoint = {
+            id: Date.now(),
+            day: timeStr,
+            time: timeStr,
+            seq_num: data.telemetry.seq_num,
+            pm1_0: Number(data.telemetry.pm1_0 ?? 10.0),
+            pm2_5: Number(data.telemetry.pm2_5 ?? 15.0),
+            pm10: Number(data.telemetry.pm10 ?? 25.0),
+            temperature: Number(data.telemetry.temperature ?? 25.0),
+            humidity: Number(data.telemetry.humidity ?? 60.0),
+            mq135: Number(data.telemetry.mq135 ?? 400.0),
+            risk_label: data.prediction?.prediction || 'Green',
+            risk: data.prediction?.prediction || 'Green'
+          };
+          return [...prev.slice(-49), newPoint];
+        });
+
+        // Compute 2-stage ML prediction tailored to active logged-in user profile
+        try {
           const payload = {
-            ...latest.telemetry,
+            ...data.telemetry,
             severity: currentUser.severity || 'Mild',
             age: currentUser.age || 22,
             sex: currentUser.sex || 'male',
@@ -169,13 +199,50 @@ export default function App() {
           };
           const updatedPred = await predictAndExplain(payload);
           setRealtimePredictionData(updatedPred);
+        } catch (e) {
+          if (data.prediction) {
+            setRealtimePredictionData(data.prediction);
+          }
         }
-      } else {
-        setIsEsp32Connected(false);
       }
-    }, 3000);
+    };
 
-    return () => clearInterval(interval);
+    const startPollingFallback = () => {
+      if (isPolling) return;
+      isPolling = true;
+      pollInterval = setInterval(async () => {
+        const latest = await fetchLatestTelemetry();
+        if (latest) {
+          handleIncomingPacket(latest);
+        } else {
+          setIsEsp32Connected(false);
+        }
+      }, 3000);
+    };
+
+    // Connect to live SSE push stream
+    const unsubscribe = subscribeTelemetryStream(
+      (data) => {
+        // SSE active: stop polling fallback if running
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+          isPolling = false;
+        }
+        handleIncomingPacket(data);
+      },
+      (err) => {
+        // SSE interrupted: engage polling fallback
+        startPollingFallback();
+      }
+    );
+
+    return () => {
+      unsubscribe();
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
   }, [currentUser]);
 
   // Real-time WhatsApp-style Notification state

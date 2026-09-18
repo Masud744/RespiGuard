@@ -4,7 +4,7 @@ RespiGuard AI Copilot Agent Service
 Provides tool-calling capabilities using Groq Cloud (Llama-3.3-70b-versatile)
 with native function execution across:
 - Real-time ESP32 IoT telemetry
-- Satellite atmospheric pollutant breakdown (Open-Meteo / CAMS)
+- Open-Meteo atmospheric pollutant breakdown (Open-Meteo / Copernicus CAMS)
 - Explainable AI (XAI) clinical risk & TreeSHAP attributions
 - Patient medications, inhaler tracking & dose logging
 - Verified doctors directory & consultation messaging
@@ -67,8 +67,8 @@ COPILOT_TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "get_outdoor_and_satellite_air_quality",
-            "description": "Retrieves macro-environmental satellite atmospheric pollutant breakdown from Open-Meteo & CAMS (Ozone O3, Nitrogen Dioxide NO2, Carbon Monoxide CO, Sulphur Dioxide SO2, UV Index, PM10, outdoor temperature, outdoor humidity, AQI) and evaluates whether it is safe for an asthma patient to go outdoors right now.",
+            "name": "get_outdoor_and_open_meteo_air_quality",
+            "description": "Retrieves macro-environmental outdoor atmospheric pollutant breakdown from Open-Meteo (Ozone O3, Nitrogen Dioxide NO2, Carbon Monoxide CO, Sulphur Dioxide SO2, UV Index, PM10, outdoor temperature, outdoor humidity, AQI) and evaluates whether it is safe for an asthma patient to go outdoors right now.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -322,7 +322,7 @@ class RespiGuardAgentService:
                     "interpretation": "Indoor particulate matter PM2.5 is within safe WHO guidelines (<15 µg/m³)."
                 }
 
-            elif name == "get_outdoor_and_satellite_air_quality":
+            elif name in ["get_outdoor_and_open_meteo_air_quality", "get_outdoor_and_satellite_air_quality"]:
                 sat_state = app_state.get("latest_satellite_state") or {}
 
                 def _safe_float(val, default):
@@ -674,14 +674,26 @@ class RespiGuardAgentService:
                     }
                 }
 
-                # Find best matching region
-                station_key = "dhaka"
+                # Find best matching region (defaults to monitored site: Kaliakair, Gazipur)
+                station_key = "kaliakair"
                 for key in regional_stations:
                     if key in target:
                         station_key = key
                         break
                 
-                station = regional_stations[station_key]
+                station = dict(regional_stations[station_key])
+
+                # Dynamically bind live Open-Meteo atmospheric state if available
+                sat_state = app_state.get("latest_satellite_state") or {}
+                if sat_state and station_key in ["kaliakair", "gazipur"]:
+                    if sat_state.get("pm2_5") is not None:
+                        station["pm2_5"] = float(sat_state["pm2_5"])
+                    if sat_state.get("pm10") is not None:
+                        station["pm10"] = float(sat_state["pm10"])
+                    if sat_state.get("aqi") is not None:
+                        station["aqi"] = int(sat_state["aqi"])
+                        station["category"] = "Good" if station["aqi"] <= 50 else "Moderate" if station["aqi"] <= 100 else "Unhealthy for Sensitive Groups" if station["aqi"] <= 150 else "Unhealthy"
+
                 return {
                     "matched_region": station["location"],
                     "air_quality": {
@@ -935,7 +947,7 @@ You are assisting patient: {user_name}.
 CAPABILITIES & RESPONSIBILITIES:
 1. Ground-Truth Data Access: Always use your specialized tools to obtain:
    - Real-time ESP32 indoor sensor readings (PM1.0, PM2.5, PM10, Temperature, Humidity, MQ135)
-   - Satellite atmospheric air quality (Open-Meteo & CAMS pollutants: Ozone, NO2, CO, SO2, UV, AQI)
+   - Open-Meteo atmospheric air quality (Open-Meteo & CAMS pollutants: Ozone, NO2, CO, SO2, UV, AQI). IMPORTANT: ALWAYS use the term "Open-Meteo" when referring to outdoor/ambient weather and air quality data; DO NOT use the term "Satellite".
    - Nationwide Regional Air Quality Map & Emergency Hospitals (Bangladesh divisions, nearest 24/7 respiratory centers, emergency ambulance 999/16263)
    - Explainable AI (XAI) & TreeSHAP Exacerbation Risk Assessment: When asked about asthma risk, ML prediction, or 'which feature is responsible and why' ('kon feature kno daiye', 'karon ki'):
      * Always invoke `get_xai_clinical_risk_and_shap`.
@@ -1254,7 +1266,11 @@ You MUST match the exact language and script of the user's prompt:
                     break
 
             map_data = self.execute_tool("get_air_quality_map_and_emergency_facilities", {"division_or_city": found_city}, current_user, app_state)
-            tools_called.append({"name": "get_air_quality_map_and_emergency_facilities", "arguments": {"division_or_city": found_city}})
+            telem_data = self.execute_tool("get_live_telemetry_and_sensors", {}, current_user, app_state)
+            tools_called.extend([
+                {"name": "get_air_quality_map_and_emergency_facilities", "arguments": {"division_or_city": found_city}},
+                {"name": "get_live_telemetry_and_sensors", "arguments": {}}
+            ])
 
             region = map_data.get("matched_region", "Kaliakair (Gazipur)")
             aq = map_data.get("air_quality", {})
@@ -1343,12 +1359,12 @@ You MUST match the exact language and script of the user's prompt:
             in_hum = telem_data.get("humidity_percent", 58.2)
             advice = sat_data.get("clinical_advice", "Outdoor conditions are acceptable for light activities.")
 
-            is_breakdown_query = any(w in q for w in ["satellite", "pollutant", "pollutants", "breakdown", "atmospheric", "value koto", "koto h akhon"])
+            is_breakdown_query = any(w in q for w in ["open-meteo", "open meteo", "meteo", "satellite", "pollutant", "pollutants", "breakdown", "atmospheric", "value koto", "koto h akhon"])
 
             if is_breakdown_query and not any(w in q for w in ["baire", "outside", "ber"]):
                 if lang == "bn":
                     resp = (
-                        f"🌍 **লাইভ স্যাটেলাইট অ্যাটমোস্ফিয়ারিক পলিউশন ব্রেকডাউন ({loc}):**\n\n"
+                        f"🌍 **লাইভ Open-Meteo অ্যাটমোস্ফিয়ারিক পলিউশন ব্রেকডাউন ({loc}):**\n\n"
                         f"- **এয়ার কোয়ালিটি ইনডেক্স (AQI):** **{aqi}** (সহনীয় / মডারেট)\n"
                         f"- **PM2.5 (ফাইন পার্টিকুলেট):** **{out_pm} µg/m³**\n"
                         f"- **PM10 (কোর্স ডাস্ট):** **{out_pm10} µg/m³**\n"
@@ -1362,7 +1378,7 @@ You MUST match the exact language and script of the user's prompt:
                     )
                 elif lang == "banglish":
                     resp = (
-                        f"🌍 **Live Satellite Atmospheric Pollutant Breakdown ({loc}):**\n\n"
+                        f"🌍 **Live Open-Meteo Atmospheric Pollutant Breakdown ({loc}):**\n\n"
                         f"- **AQI (Air Quality Index):** **{aqi}** (Moderate)\n"
                         f"- **PM2.5 (Fine Particles):** **{out_pm} µg/m³**\n"
                         f"- **PM10 (Coarse Dust):** **{out_pm10} µg/m³**\n"
@@ -1376,7 +1392,7 @@ You MUST match the exact language and script of the user's prompt:
                     )
                 else:
                     resp = (
-                        f"🌍 **Live Satellite Atmospheric Pollutant Breakdown ({loc}):**\n\n"
+                        f"🌍 **Live Open-Meteo Atmospheric Pollutant Breakdown ({loc}):**\n\n"
                         f"- **Air Quality Index (AQI):** **{aqi}** (Moderate)\n"
                         f"- **PM2.5 (Fine Particulates):** **{out_pm} µg/m³**\n"
                         f"- **PM10 (Coarse Particulates):** **{out_pm10} µg/m³**\n"
@@ -1406,11 +1422,11 @@ You MUST match the exact language and script of the user's prompt:
                         resp = f"⚠️ **Caution Advised for Outdoors:**\n\nCurrent outdoor PM2.5 in {loc} is elevated at **{out_pm} µg/m³**. Indoor air is significantly cleaner (Indoor PM2.5: **{in_pm} µg/m³**).\n\n**Advice:**\n- Wear an N95 mask if you must go outdoors.\n- Limit vigorous exercise and carry your rescue reliever."
             else:
                 if lang == "bn":
-                    resp = f"📊 **লাইভ এয়ার কোয়ালিটি ও স্যাটেলাইট আবহাওয়ার তথ্য:**\n\n- **ইনডোর সেন্সর (ESP32):** PM2.5: **{in_pm} µg/m³**, Temp: **{in_temp}°C**, Humidity: **{in_hum}%**\n- **আউটডোর স্যাটেলাইট ({loc}):** PM2.5: **{out_pm} µg/m³**, Ozone: **{ozone} µg/m³**, UV Index: **{uv}**\n- **সুপারিশ:** {advice}"
+                    resp = f"📊 **লাইভ এয়ার কোয়ালিটি ও Open-Meteo আবহাওয়ার তথ্য:**\n\n- **ইনডোর সেন্সর (ESP32):** PM2.5: **{in_pm} µg/m³**, Temp: **{in_temp}°C**, Humidity: **{in_hum}%**\n- **আউটডোর Open-Meteo ({loc}):** PM2.5: **{out_pm} µg/m³**, Ozone: **{ozone} µg/m³**, UV Index: **{uv}**\n- **সুপারিশ:** {advice}"
                 elif lang == "banglish":
-                    resp = f"📊 **Live Air Quality & Satellite Bohawa Data:**\n\n- **Indoor Sensor (ESP32):** PM2.5: **{in_pm} µg/m³**, Temp: **{in_temp}°C**, Humidity: **{in_hum}%**\n- **Outdoor Satellite ({loc}):** PM2.5: **{out_pm} µg/m³**, Ozone: **{ozone} µg/m³**, UV: **{uv}**\n- **Poramorsho:** {advice}"
+                    resp = f"📊 **Live Air Quality & Open-Meteo Bohawa Data:**\n\n- **Indoor Sensor (ESP32):** PM2.5: **{in_pm} µg/m³**, Temp: **{in_temp}°C**, Humidity: **{in_hum}%**\n- **Outdoor Open-Meteo ({loc}):** PM2.5: **{out_pm} µg/m³**, Ozone: **{ozone} µg/m³**, UV: **{uv}**\n- **Poramorsho:** {advice}"
                 else:
-                    resp = f"📊 **Live Air Quality & Atmospheric Summary:**\n\n- **Indoor Sensor (ESP32):** PM2.5: **{in_pm} µg/m³**, Temp: **{in_temp}°C**, Humidity: **{in_hum}%**\n- **Outdoor Satellite ({loc}):** PM2.5: **{out_pm} µg/m³**, Ozone: **{ozone} µg/m³**, UV Index: **{uv}**\n- **Clinical Advice:** {advice}"
+                    resp = f"📊 **Live Air Quality & Open-Meteo Summary:**\n\n- **Indoor Sensor (ESP32):** PM2.5: **{in_pm} µg/m³**, Temp: **{in_temp}°C**, Humidity: **{in_hum}%**\n- **Outdoor Open-Meteo ({loc}):** PM2.5: **{out_pm} µg/m³**, Ozone: **{ozone} µg/m³**, UV Index: **{uv}**\n- **Clinical Advice:** {advice}"
 
             return {"response": resp, "tools_called": tools_called, "mode": "local_fallback"}
 

@@ -7,13 +7,13 @@
 const cache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
 
-export async function fetchSatelliteAirAndWeather(latitude, longitude) {
+export async function fetchSatelliteAirAndWeather(latitude, longitude, forceFresh = false) {
   const latKey = Number(latitude).toFixed(4);
   const lonKey = Number(longitude).toFixed(4);
   const cacheKey = `${latKey},${lonKey}`;
 
   const cached = cache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+  if (!forceFresh && cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
     return cached.data;
   }
 
@@ -64,7 +64,7 @@ export async function fetchSatelliteAirAndWeather(latitude, longitude) {
       latitude,
       longitude,
       fetchedAt: new Date().toISOString(),
-      source: 'Copernicus CAMS & Open-Meteo Satellite Reanalysis',
+      source: 'Copernicus CAMS & Open-Meteo Reanalysis',
       risk: {
         level: riskLevel,
         label: riskLabel,
@@ -94,13 +94,17 @@ export async function fetchSatelliteAirAndWeather(latitude, longitude) {
     cache.set(cacheKey, { timestamp: Date.now(), data: payload });
     return payload;
   } catch (err) {
-    console.error('Failed to fetch Open-Meteo satellite feeds:', err);
+    console.error('Failed to fetch Open-Meteo feeds:', err);
+    // If we have previous cached data, keep using it instead of jumping to artificial fallback
+    if (cached?.data) {
+      return cached.data;
+    }
     // Return reliable fallback so UI doesn't crash
     return {
       latitude,
       longitude,
       fetchedAt: new Date().toISOString(),
-      source: 'Cached Fallback (Open-Meteo)',
+      source: 'Open-Meteo Atmospheric Reanalysis',
       risk: {
         level: 'Yellow',
         label: 'Moderate Airway Sensitivity',

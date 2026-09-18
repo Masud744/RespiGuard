@@ -1,4 +1,6 @@
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+  ? 'https://vocational-pipeline-bytes-ensures.trycloudflare.com/api'
+  : 'http://127.0.0.1:8000/api';
 
 /**
  * Normalizes backend error responses (string, array of validation objects, error objects)
@@ -464,6 +466,72 @@ export async function fetchLatestTelemetry() {
   } catch (err) {
     return null;
   }
+}
+
+/**
+ * Subscribes to the live Server-Sent Events (SSE) telemetry stream.
+ * Emits incoming telemetry, AHI hazard, and ML predictions instantaneously.
+ * Automatically attempts reconnection if disconnected.
+ * Returns an unsubscribe teardown function to cleanly close the EventSource.
+ *
+ * @param {Function} onData - Callback receiving parsed telemetry JSON payload
+ * @param {Function} onError - Optional callback on connection error
+ * @returns {Function} Teardown unsubscribe function
+ */
+export function subscribeTelemetryStream(onData, onError) {
+  if (typeof window === 'undefined' || !window.EventSource) {
+    if (onError) onError(new Error('EventSource is not supported in this environment'));
+    return () => {};
+  }
+
+  const streamUrl = `${API_BASE}/telemetry/stream`;
+  let eventSource = null;
+  let isClosed = false;
+  let reconnectTimer = null;
+
+  function connect() {
+    if (isClosed) return;
+    try {
+      eventSource = new EventSource(streamUrl);
+
+      eventSource.onmessage = (event) => {
+        try {
+          if (!event.data) return;
+          const parsed = JSON.parse(event.data);
+          if (onData) onData(parsed);
+        } catch (err) {
+          console.warn('Failed to parse SSE telemetry packet:', err);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        if (eventSource && eventSource.readyState === EventSource.CLOSED) {
+          eventSource.close();
+          eventSource = null;
+          if (!isClosed) {
+            reconnectTimer = setTimeout(connect, 3000);
+          }
+        }
+        if (onError) onError(err);
+      };
+    } catch (err) {
+      if (onError) onError(err);
+    }
+  }
+
+  connect();
+
+  return () => {
+    isClosed = true;
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    }
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+  };
 }
 
 export async function fetchTelemetryHistory(userId = null) {

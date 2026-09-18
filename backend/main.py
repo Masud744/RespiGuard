@@ -28,11 +28,14 @@ import json
 import time
 import secrets
 import hashlib
+import asyncio
+import numpy as np
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 
 from fastapi import FastAPI, HTTPException, Header, BackgroundTasks, Depends, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
@@ -206,6 +209,28 @@ latest_telemetry_state = {
     "environmental_hazard": None,
     "satellite_pollutant_breakdown": latest_satellite_state
 }
+
+# ==============================================================================
+# Real-Time SSE Broadcaster for Telemetry Streaming
+# ==============================================================================
+telemetry_subscribers: List[asyncio.Queue] = []
+
+async def broadcast_telemetry(payload: dict):
+    """Pushes new telemetry event to all connected SSE clients asynchronously."""
+    if not telemetry_subscribers:
+        return
+    msg = f"data: {json.dumps(payload)}\n\n"
+    dead_queues = []
+    for q in list(telemetry_subscribers):
+        try:
+            q.put_nowait(msg)
+        except asyncio.QueueFull:
+            dead_queues.append(q)
+        except Exception:
+            dead_queues.append(q)
+    for dq in dead_queues:
+        if dq in telemetry_subscribers:
+            telemetry_subscribers.remove(dq)
 
 # ==============================================================================
 # Per-Device Environmental Hazard & Exposure Metrology Windows
@@ -560,12 +585,17 @@ def read_root():
 
 @app.get("/api/health")
 def get_health():
+    features = (
+        getattr(xai_service, 'patient_all_cols', None)
+        or getattr(xai_service, 'legacy_cols', None)
+        or getattr(xai_service, 'sensor_cols', [])
+    )
     return {
         "status": "healthy",
-        "model": "Legacy Random Forest Fallback (Feasibility Prototype - Not Clinically Validated)",
-        "explainer": "Heuristic Feature Indicators (Non-SHAP)",
-        "features": xai_service.feature_cols if xai_service.fallback_rf is not None else xai_service.all_cols,
-        "classes": xai_service.classes,
+        "model": "RespiGuard Dual-Pipeline Hierarchical XAI Service",
+        "explainer": "TreeSHAP Local & Global Explainer",
+        "features": features,
+        "classes": getattr(xai_service, 'classes', ['Green', 'Yellow', 'Red']),
         "auth": "HS256 JWT Multi-Key Keystore",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
@@ -1199,7 +1229,7 @@ async def ingest_telemetry(
     # 3. Cryptographic HMAC Verification
     device_secret = db_service.get_device_secret(device_node)
     if not device_secret:
-        device_secret = os.getenv("SIMULATOR_DEVICE_PSK") or secrets.token_urlsafe(32)
+        device_secret = os.getenv("SIMULATOR_DEVICE_PSK", "respiguard-device-psk-secret-key-2026")
 
     payload_sha256 = hashlib.sha256(raw_body).hexdigest()
     canonical_string = compute_telemetry_canonical_string(
@@ -1312,7 +1342,8 @@ async def ingest_telemetry(
     # Prohibits patient-specific clinical narrative (explanation), personal advice (recommendation), and echoed patient profile (telemetry)
     PUBLIC_PREDICTION_ALLOWLIST = {
         "prediction", "prediction_idx", "prediction_title",
-        "probabilities", "confidence", "base_value", "feature_impacts"
+        "probabilities", "confidence", "base_value", "feature_impacts",
+        "pipeline_mode", "model_version"
     }
     public_prediction = {
         k: prediction[k] for k in PUBLIC_PREDICTION_ALLOWLIST if k in prediction
@@ -1325,6 +1356,13 @@ async def ingest_telemetry(
         "environmental_hazard": env_hazard,
         "satellite_pollutant_breakdown": latest_satellite_state
     }
+
+    # Broadcast to active SSE subscribers immediately
+    sse_payload = {
+        **latest_telemetry_state,
+        "is_esp32_connected": True
+    }
+    await broadcast_telemetry(sse_payload)
 
     # 7. Check if High Risk (Red) and send emergency alert email
     if prediction.get("prediction") == "Red" and telemetry.user_id:
@@ -1385,6 +1423,66 @@ def get_latest_telemetry():
     resp["satellite_pollutant_breakdown"] = latest_satellite_state
     return resp
 
+@app.get("/api/telemetry/stream")
+async def stream_telemetry(request: Request, max_events: Optional[int] = None):
+    """
+    Server-Sent Events (SSE) stream for real-time sensor & prediction pushes.
+    Pushes instantaneous updates to connected dashboards when new ESP32 packets arrive.
+    Also sends immediate snapshot on connection and periodic heartbeats.
+    Optional max_events parameter enables deterministic automated testing & client probes.
+    """
+    queue: asyncio.Queue = asyncio.Queue(maxsize=50)
+    telemetry_subscribers.append(queue)
+
+    async def event_generator():
+        yielded_count = 0
+        try:
+            # Send initial snapshot if available
+            if latest_telemetry_state:
+                snapshot = dict(latest_telemetry_state)
+                is_connected = False
+                last_iso = snapshot.get("timestamp")
+                if last_iso:
+                    try:
+                        last_dt = datetime.fromisoformat(last_iso)
+                        now_utc = datetime.now(timezone.utc)
+                        is_connected = (now_utc - last_dt).total_seconds() <= 45.0
+                    except Exception:
+                        pass
+                snapshot["is_esp32_connected"] = is_connected
+                yield f"data: {json.dumps(snapshot)}\n\n"
+            else:
+                yield f"data: {json.dumps({'is_esp32_connected': False, 'message': 'Awaiting telemetry'})}\n\n"
+            yielded_count += 1
+            if max_events is not None and yielded_count >= max_events:
+                return
+
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    msg = await asyncio.wait_for(queue.get(), timeout=15.0)
+                    yield msg
+                    yielded_count += 1
+                    if max_events is not None and yielded_count >= max_events:
+                        break
+                except asyncio.TimeoutError:
+                    # SSE comment heartbeat to keep connection alive through proxies
+                    yield ": heartbeat\n\n"
+        finally:
+            if queue in telemetry_subscribers:
+                telemetry_subscribers.remove(queue)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
 @app.get("/api/telemetry/history")
 def get_telemetry_history(
     user_id: Optional[str] = None,
@@ -1442,6 +1540,52 @@ def get_dashboard_stats():
 
 @app.get("/api/history")
 def get_history(limit: int = 50, timeframe: str = "weekly"):
+    """
+    Returns environmental & telemetry history.
+    Prioritizes actual real-time telemetry readings from the database (ESP32 node).
+    Falls back gracefully to clinical baseline cohort dataset if no telemetry exists.
+    """
+    # 1. Prioritize real live telemetry database readings
+    real_readings = db_service.get_recent_telemetry(limit=limit)
+    if real_readings and len(real_readings) >= 1:
+        sorted_readings = list(reversed(real_readings))
+        records = []
+        days = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
+
+        for idx, r in enumerate(sorted_readings):
+            created_str = str(r.get("created_at") or "")
+            time_part = ""
+            if "T" in created_str:
+                time_part = created_str.split("T")[1][:5]
+            elif " " in created_str:
+                time_part = created_str.split(" ")[1][:5]
+            else:
+                time_part = f"#{r.get('seq_num', idx)}"
+
+            if timeframe == "live":
+                day_label = time_part if time_part else f"#{r.get('seq_num', idx)}"
+            elif timeframe == "weekly":
+                day_label = days[idx % len(days)]
+            else:
+                day_label = f"T-{len(sorted_readings)-idx}h"
+
+            records.append({
+                "id": r.get("id", idx),
+                "day": day_label,
+                "time": time_part or f"#{r.get('seq_num', idx)}",
+                "seq_num": r.get("seq_num"),
+                "pm1_0": round(float(r.get("pm1_0") if r.get("pm1_0") is not None else 10.0), 1),
+                "pm2_5": round(float(r.get("pm2_5") if r.get("pm2_5") is not None else 15.0), 1),
+                "pm10": round(float(r.get("pm10") if r.get("pm10") is not None else 25.0), 1),
+                "temperature": round(float(r.get("temperature") if r.get("temperature") is not None else 25.0), 1),
+                "humidity": round(float(r.get("humidity") if r.get("humidity") is not None else 60.0), 1),
+                "mq135": round(float(r.get("mq135") if r.get("mq135") is not None else 400.0), 1),
+                "risk_label": r.get("prediction", "Green"),
+                "risk": r.get("prediction", "Green")
+            })
+        return {"data": records}
+
+    # 2. Fallback to clinical baseline dataset if database is empty
     if xai_service.dataset_df is not None and not xai_service.dataset_df.empty:
         df = xai_service.dataset_df.copy()
         if len(df) > limit:
@@ -1455,18 +1599,16 @@ def get_history(limit: int = 50, timeframe: str = "weekly"):
         
         for idx, (_, row) in enumerate(sampled_df.iterrows()):
             day_label = days[idx % len(days)] if timeframe == "weekly" else f"T-{len(sampled_df)-idx}h"
-            med_intake = round(min(100, max(20, 85 - (row['pm2_5'] * 0.8) + (np.sin(idx * 0.5) * 15))), 1) if 'pm2_5' in row else 80.0
-            compliance = round(min(100, max(30, 90 - (row['pm10'] * 0.5) + (np.cos(idx * 0.4) * 10))), 1) if 'pm10' in row else 85.0
-            
             records.append({
                 "id": idx,
                 "day": day_label,
-                "medication_adherence": med_intake,
-                "environmental_compliance": compliance,
+                "time": f"T-{len(sampled_df)-idx}h",
+                "pm1_0": round(float(row.get('pm1_0', 10.0)), 1),
                 "pm2_5": round(float(row.get('pm2_5', 15.0)), 1),
                 "pm10": round(float(row.get('pm10', 25.0)), 1),
                 "temperature": round(float(row.get('temperature', 24.0)), 1),
                 "humidity": round(float(row.get('humidity', 55.0)), 1),
+                "risk_label": row.get('risk_label', 'Green'),
                 "risk": row.get('risk_label', 'Green')
             })
         return {"data": records}

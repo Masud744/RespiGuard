@@ -300,3 +300,45 @@ def test_dual_pipeline_mode_b_calibrated_profile():
     assert set(data["provenance"]["feature_schema"]) == expected_feats
     assert len(data["feature_impacts"]) == 7
 
+
+def test_sse_telemetry_stream_initial_snapshot():
+    """Verifies that /api/telemetry/stream connects and yields real-time event-stream data."""
+    with client.stream("GET", "/api/telemetry/stream?max_events=1") as response:
+        assert response.status_code == 200
+        assert "text/event-stream" in response.headers.get("content-type", "")
+        lines = []
+        for line in response.iter_lines():
+            if line:
+                lines.append(line)
+                if line.startswith("data:"):
+                    break
+        assert len(lines) > 0
+        data_line = [l for l in lines if l.startswith("data:")][0]
+        payload = json.loads(data_line.replace("data:", "").strip())
+        assert "is_esp32_connected" in payload or "telemetry" in payload
+
+
+def test_sse_telemetry_broadcast_on_ingest():
+    """Verifies that ingested telemetry updates latest state and is available for SSE."""
+    now_utc = datetime.now(timezone.utc)
+    device_node = "ESP32-RespiGuard-Stream-Test"
+    seq_num = 1
+    t_payload = {
+        "temperature": 27.5,
+        "humidity": 62.0,
+        "pm1_0": 11.0,
+        "pm2_5": 18.5,
+        "pm10": 29.0,
+        "mq135": 420.0
+    }
+    body, headers = build_signed_packet(device_node, seq_num, now_utc, t_payload)
+    resp = client.post("/api/telemetry", data=body, headers=headers)
+    assert resp.status_code == 200
+
+    latest = client.get("/api/telemetry/latest").json()
+    assert latest["is_esp32_connected"] is True
+    assert latest["telemetry"]["pm2_5"] == 18.5
+    assert latest["telemetry"]["temperature"] == 27.5
+
+
+

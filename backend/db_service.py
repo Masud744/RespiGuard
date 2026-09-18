@@ -2062,6 +2062,47 @@ class DatabaseService:
             print(f"[DB Service] SQLite telemetry insertion notice: {se}")
 
         if not self.use_postgres:
+            if self.base_url:
+                try:
+                    target_user_id = user_id
+                    if not target_user_id:
+                        with httpx.Client(timeout=3.0) as client:
+                            dev_res = client.get(f"{self.base_url}/devices?device_node=eq.{device_node}&select=registered_user_id", headers=HEADERS)
+                            if dev_res.status_code == 200 and dev_res.json():
+                                target_user_id = dev_res.json()[0].get('registered_user_id')
+
+                    if not target_user_id:
+                        target_user_id = "046c2316-3dbe-4049-ad27-463ddf402a9a"
+
+                    supabase_payload = {
+                        "device_node": device_node,
+                        "user_id": target_user_id,
+                        "seq_num": seq_num,
+                        "temperature": float(telemetry.get('temperature', 25.0)),
+                        "humidity": float(telemetry.get('humidity', 60.0)),
+                        "pm1_0": float(telemetry.get('pm1_0', 10.0)),
+                        "pm2_5": float(telemetry.get('pm2_5', 15.0)),
+                        "pm10": float(telemetry.get('pm10', 25.0)),
+                        "mq135": float(telemetry.get('mq135', 412.0)),
+                        "prediction": prediction.get('prediction', 'Green'),
+                        "prob_green": float(probs.get('Green', 90.0)),
+                        "prob_yellow": float(probs.get('Yellow', 8.0)),
+                        "prob_red": float(probs.get('Red', 2.0)),
+                        "confidence": float(prediction.get('confidence', 90.0)),
+                        "packet_timestamp": packet_timestamp.isoformat() if hasattr(packet_timestamp, 'isoformat') else str(packet_timestamp),
+                        "received_at": t_recv.isoformat()
+                    }
+
+                    with httpx.Client(timeout=4.0) as client:
+                        client.post(f"{self.base_url}/telemetry_readings", headers=HEADERS, json=supabase_payload)
+                        client.patch(
+                            f"{self.base_url}/devices?device_node=eq.{device_node}",
+                            headers=HEADERS,
+                            json={"last_seq_num": seq_num, "last_seen_at": t_recv.isoformat()}
+                        )
+                except Exception as sbe:
+                    print(f"[DB Service] Supabase telemetry sync notice: {sbe}")
+
             return {
                 "status": "success",
                 "id": str(sqlite_row_id) if sqlite_row_id else secrets.token_hex(16),
