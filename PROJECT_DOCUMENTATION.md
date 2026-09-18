@@ -722,6 +722,7 @@ e.g. Budesonide / Fluticasone                      e.g. Salbutamol / Ventolin
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/telemetry/latest` | — | সর্বশেষ ইনডোর সেন্সর রিডিং ও ২-ধাপের ML ঝুঁকি প্রেডিকশন আনে |
 | `POST`| `/api/telemetry` | `temperature, humidity, pm1_0, pm2_5, pm10, mq135` | ESP32 বা সিমুলেটর থেকে সেন্সর ডেটা গ্রহণ ও সংরক্ষণ |
+| `POST`| `/api/predict` | `temperature, humidity, pm2_5, pm10, [mode], [max_pef_expected]` | ডুয়াল-পাইপলাইন (মোড এ/বি) ঝুঁকি নিরূপণ ও TreeSHAP এক্সপ্ল্যানেশন প্রদান |
 | `POST`| `/api/auth/request-otp` | `email, role, full_name, age, pef_best, bmdc_number` | চিকিৎসকের বা রোগীর ইমেইলে ৬-সংখ্যার ক্রিপ্টোগ্রাফিক ওটিপি পাঠায় |
 | `POST`| `/api/auth/verify-otp` | `email, otp_code` | ওটিপি যাচাই করে অ্যাক্সেস টোকেন (JWT) ও Patient ID ইস্যু করে |
 | `GET` | `/api/copilot/status` | — | এআই কোপাইলট স্ট্যাটাস ও সক্রিয় মডেল (`qwen/qwen3.8-27b`) প্রদান করে |
