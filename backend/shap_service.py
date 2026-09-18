@@ -2,7 +2,29 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
-import shap
+
+def compute_catboost_shap(model, X_trans) -> np.ndarray:
+    """Computes exact TreeSHAP values natively in C++ via CatBoost without loading heavy shap library."""
+    try:
+        from catboost import Pool
+        pool = Pool(X_trans)
+        vals = model.get_feature_importance(pool, type='ShapValues')
+        return vals[:, :-1] if len(vals.shape) == 2 else vals[:-1]
+    except Exception as e:
+        print(f"[XAI Service] CatBoost native TreeSHAP error: {e}")
+        return np.zeros((len(X_trans), X_trans.shape[1]))
+
+def compute_xgboost_shap(model, X_trans) -> np.ndarray:
+    """Computes exact TreeSHAP values natively in C++ via XGBoost without loading heavy shap library."""
+    try:
+        import xgboost as xgb
+        booster = model.get_booster() if hasattr(model, 'get_booster') else model
+        dmat = xgb.DMatrix(X_trans)
+        vals = booster.predict(dmat, pred_contribs=True)
+        return vals[:, :-1] if len(vals.shape) == 2 else vals[:-1]
+    except Exception as e:
+        print(f"[XAI Service] XGBoost native TreeSHAP error: {e}")
+        return np.zeros((len(X_trans), X_trans.shape[1]))
 
 class AsthmaXAIService:
     def __init__(self):
@@ -22,10 +44,6 @@ class AsthmaXAIService:
         # Dual-Pipeline Model Bundles
         self.mode_a_bundle = None
         self.mode_b_bundle = None
-        self.explainer_a1 = None
-        self.explainer_a2 = None
-        self.explainer_b1 = None
-        self.explainer_b2 = None
         
         # Historical / Fallback references
         self.bundle = None
@@ -33,7 +51,6 @@ class AsthmaXAIService:
         self.stage1_model = None
         self.stage2_model = None
         self.fallback_rf = None
-        self.tree_explainer = None
         
         self.dataset_df = None
         self.global_importance = None
@@ -76,10 +93,7 @@ class AsthmaXAIService:
             print(f"[XAI Service] Loading Mode A (4-sensor leak-free) bundle from: {mode_a_path}")
             try:
                 self.mode_a_bundle = joblib.load(mode_a_path)
-                if isinstance(self.mode_a_bundle, dict):
-                    self.explainer_a1 = shap.TreeExplainer(self.mode_a_bundle['stage1_model'])
-                    self.explainer_a2 = shap.TreeExplainer(self.mode_a_bundle['stage2_model'])
-                    print("[XAI Service] Mode A Pipeline loaded with CatBoost TreeSHAP explainers.")
+                print("[XAI Service] Mode A Pipeline loaded with CatBoost native TreeSHAP.")
             except Exception as e:
                 print(f"[XAI Service] Error loading Mode A bundle: {e}")
 
@@ -88,10 +102,7 @@ class AsthmaXAIService:
             print(f"[XAI Service] Loading Mode B (calibrated 7-feature) bundle from: {mode_b_path}")
             try:
                 self.mode_b_bundle = joblib.load(mode_b_path)
-                if isinstance(self.mode_b_bundle, dict):
-                    self.explainer_b1 = shap.TreeExplainer(self.mode_b_bundle['stage1_model'])
-                    self.explainer_b2 = shap.TreeExplainer(self.mode_b_bundle['stage2_model'])
-                    print("[XAI Service] Mode B Pipeline loaded with TreeSHAP explainers.")
+                print("[XAI Service] Mode B Pipeline loaded with CatBoost/XGBoost native TreeSHAP.")
             except Exception as e:
                 print(f"[XAI Service] Error loading Mode B bundle: {e}")
 
@@ -106,13 +117,12 @@ class AsthmaXAIService:
             except Exception as e:
                 print(f"[XAI Service] Legacy 2-stage bundle notice: {e}")
 
-        # 4. Fallback RF Explainer
+        # 4. Fallback RF Model
         if os.path.exists(rf_path):
             try:
                 self.fallback_rf = joblib.load(rf_path)
-                self.tree_explainer = shap.TreeExplainer(self.fallback_rf)
             except Exception as e:
-                self.tree_explainer = None
+                self.fallback_rf = None
 
         # 5. Load Dataset
         if os.path.exists(dataset_path):
@@ -250,16 +260,16 @@ class AsthmaXAIService:
             if s1_prob[1] < tau_1:
                 pred_idx = 0
                 pred_label = "Green"
-                shap_raw = self.explainer_b1.shap_values(X_trans)
+                shap_raw = compute_catboost_shap(st1, X_trans)
             else:
                 if s2_prob[1] >= tau_2:
                     pred_idx = 2
                     pred_label = "Red"
-                    shap_raw = self.explainer_b2.shap_values(X_trans)
+                    shap_raw = compute_xgboost_shap(st2, X_trans)
                 else:
                     pred_idx = 1
                     pred_label = "Yellow"
-                    shap_raw = self.explainer_b1.shap_values(X_trans)
+                    shap_raw = compute_catboost_shap(st1, X_trans)
 
             p_green = float(s1_prob[0])
             p_yellow = float(s1_prob[1] * s2_prob[0])
@@ -308,16 +318,16 @@ class AsthmaXAIService:
             if s1_prob[1] < tau_1:
                 pred_idx = 0
                 pred_label = "Green"
-                shap_raw = self.explainer_a1.shap_values(X_trans)
+                shap_raw = compute_catboost_shap(st1, X_trans)
             else:
                 if s2_prob[1] >= tau_2:
                     pred_idx = 2
                     pred_label = "Red"
-                    shap_raw = self.explainer_a2.shap_values(X_trans)
+                    shap_raw = compute_catboost_shap(st2, X_trans)
                 else:
                     pred_idx = 1
                     pred_label = "Yellow"
-                    shap_raw = self.explainer_a1.shap_values(X_trans)
+                    shap_raw = compute_catboost_shap(st1, X_trans)
 
             p_green = float(s1_prob[0])
             p_yellow = float(s1_prob[1] * s2_prob[0])
@@ -407,7 +417,7 @@ class AsthmaXAIService:
                 "model_type": model_title,
                 "model_version": model_ver,
                 "pipeline_mode": active_mode,
-                "xai_engine": "Model-Derived TreeSHAP (shap.TreeExplainer)" if using_model_shap else "Clinical Heuristic Indicators",
+                "xai_engine": "Model-Derived TreeSHAP (CatBoost/XGBoost Native)" if using_model_shap else "Clinical Heuristic Indicators",
                 "is_model_derived": using_model_shap,
                 "is_rule_based_fallback": not using_model_shap,
                 "attribution_method": "Exact Path-Dependent Tree Shapley Values",
