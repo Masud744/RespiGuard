@@ -588,7 +588,7 @@ def read_root():
     return {
         "service": "RespiGuard XAI Asthma Risk Monitoring API",
         "status": "online",
-        "version": "2.1.0",
+        "version": "2.1.2",
         "model_loaded": xai_service.stage1_model is not None or xai_service.fallback_rf is not None,
         "database": "Staging PostgreSQL connected" if db_service.use_postgres else "Supabase REST connected"
     }
@@ -605,6 +605,7 @@ def get_health():
     )
     return {
         "status": "healthy",
+        "version": "2.1.2",
         "model": "RespiGuard Dual-Pipeline Hierarchical XAI Service",
         "explainer": "TreeSHAP Local & Global Explainer",
         "features": features,
