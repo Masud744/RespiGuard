@@ -22,25 +22,35 @@
 
 ## Visual Highlights & System Demonstration
 
-### 1. Master System Dashboard & Real-Time Telemetry Metrology
+### 1. Physical Cyber-Physical Edge IoT Prototype
+| Physical Hardware Circuit (Breadboard Layout) | Front Elevation Sensor Array |
+| :---: | :---: |
+| ![Physical Hardware Prototype](Screenshots/13_hardware_prototype_rig.jpeg) | ![Active Sensor Array Front View](Screenshots/14_hardware_sensor_array_front.jpeg) |
+| *Figure 1: Fully assembled Cyber-Physical edge sensing node featuring ESP32 NodeMCU, Plantower PMS5003 laser particulate counter, DHT22 ambient probe, and Winsen MQ-135 sensor.* | *Figure 2: Front elevation view highlighting the laser optical scattering chamber, humidity grille, and gas sensor head under active operation.* |
+
+### 2. Live Cyber-Physical Telemetry Integration (Hardware Serial Stream vs. Web Dashboard)
+![Live IoT Serial Telemetry Split Screen](Screenshots/16_live_iot_serial_telemetry_split.png)
+*Figure 3: Live hardware-to-cloud validation: (Right) Arduino IDE Serial Monitor connected via `/dev/ttyUSB0` at 115200 baud streaming raw sensor packets (Seq #43, 33.2°C, 76.3% RH, PM2.5 15.0 µg/m³, MQ-135 423.5 ppm); (Left) Synchronized RespiGuard.ai live web dashboard displaying instantaneous Green Zone AI inference (67.9% confidence).*
+
+### 3. Master System Dashboard & Real-Time Telemetry Metrology
 ![Master Dashboard Overview](Screenshots/05_main_telemetry_dashboard.png)
-*Figure 1: Main clinical respiratory web interface featuring continuous 5-parameter environmental telemetry (PM2.5, PM10, PM1.0, Temperature, Humidity) streamed live from the ESP32 edge node, alongside instant AI Asthma Risk predictions and environmental purity index.*
+*Figure 4: Main clinical respiratory web interface featuring continuous 5-parameter environmental telemetry (PM2.5, PM10, PM1.0, Temperature, Humidity) streamed live from the ESP32 edge node, alongside instant AI Asthma Risk predictions and environmental purity index.*
 
-### 2. Atmospheric Pollution Metrology & Emergency Hospital Routing
+### 4. Atmospheric Pollution Metrology & Emergency Hospital Routing
 ![Air Quality and Hospital Emergency Routing](Screenshots/06_air_quality_hospital_map.png)
-*Figure 2: Geospatial atmospheric intelligence integrating Open-Meteo regional feeds with Leaflet mapping, radial risk dispersion envelopes (1.5 km immediate, 3.5 km local, 6.5 km regional), and nearest emergency pulmonology center turn-by-turn routing.*
+*Figure 5: Geospatial atmospheric intelligence integrating Open-Meteo regional feeds with Leaflet mapping, radial risk dispersion envelopes (1.5 km immediate, 3.5 km local, 6.5 km regional), and nearest emergency pulmonology center turn-by-turn routing.*
 
-### 3. Microclimate Metrology: Indoor IoT vs. Outdoor Open-Meteo
+### 5. Microclimate Metrology: Indoor IoT vs. Outdoor Open-Meteo
 ![Indoor IoT vs Outdoor Telemetry](Screenshots/07_indoor_vs_outdoor_telemetry.png)
-*Figure 3: Side-by-side comparative analysis of localized indoor microclimate sensors versus regional outdoor Open-Meteo atmospheric telemetry, including Ozone (O3), NO2, CO, SO2, and UV Index.*
+*Figure 6: Side-by-side comparative analysis of localized indoor microclimate sensors versus regional outdoor Open-Meteo atmospheric telemetry, including Ozone (O3), NO2, CO, SO2, and UV Index.*
 
-### 4. Dual-Layer Explainable AI (TreeSHAP Feature Attributions)
+### 6. Dual-Layer Explainable AI (TreeSHAP Feature Attributions)
 ![TreeSHAP Feature Rankings](Screenshots/08_treeshap_explainable_ai.png)
-*Figure 4: Global population feature rankings and local TreeSHAP waterfall attributions decomposing individual patient predictions into exact positive and negative force contributions.*
+*Figure 7: Global population feature rankings and local TreeSHAP waterfall attributions decomposing individual patient predictions into exact positive and negative force contributions.*
 
-### 5. Multi-Role Authentication & Real-Time Email OTP Verification
+### 7. Multi-Role Authentication & Real-Time Email OTP Verification
 ![Email OTP Verification](Screenshots/04_email_otp_verification.png)
-*Figure 5: Enterprise security architecture featuring role-based onboarding (Patient and Doctor portals) with automated 6-digit HTML email OTP verification dispatched via SMTP.*
+*Figure 8: Enterprise security architecture featuring role-based onboarding (Patient and Doctor portals) with automated 6-digit HTML email OTP verification dispatched via SMTP.*
 
 ---
 
