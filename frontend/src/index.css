@@ -5,6 +5,8 @@
 @layer base {
   body {
     background-color: #060f0c;
+    background-image: linear-gradient(to right, rgba(0, 229, 153, 0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 229, 153, 0.035) 1px, transparent 1px);
+    background-size: 4rem 4rem;
     color: #e2e8f0;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
@@ -61,4 +63,24 @@ input[type=range]::-webkit-slider-thumb {
   background: #00e599;
   cursor: pointer;
   box-shadow: 0 0 10px #00e599;
+}
+
+/* OpenStreetMap Dark Forest Theme Filter (100% Free & No API Key Required) */
+.dark-forest-tiles .leaflet-tile {
+  filter: brightness(0.65) invert(100%) contrast(135%) hue-rotate(185deg) saturate(55%);
+}
+
+.leaflet-container {
+  background-color: #071f17 !important;
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+  background: #092c20 !important;
 }

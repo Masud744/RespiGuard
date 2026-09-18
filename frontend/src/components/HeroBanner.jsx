@@ -12,15 +12,11 @@ export default function HeroBanner({ currentUser }) {
 
       {/* Left Content */}
       <div className="relative z-10 max-w-lg">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-emerald-300/90 text-sm font-medium">Welcome {userName}</span>
-        </div>
-
         <h2 className="text-3xl font-extrabold text-white tracking-tight leading-snug">
-          Check Your Health!
+          Welcome back, {userName}
         </h2>
         <p className="text-emerald-100/75 text-xs sm:text-sm mt-1 leading-relaxed">
-          Here's Your Health At A Glance & Real-time AI Risk Attribution...
+          Real-time respiratory telemetry and personalized asthma monitoring
         </p>
       </div>
 
@@ -35,7 +31,7 @@ export default function HeroBanner({ currentUser }) {
             <div className="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 mb-1.5 shadow-md shadow-emerald-500/20">
               <Stethoscope className="w-6 h-6 stroke-[2]" />
             </div>
-            <span className="text-[11px] font-bold text-white leading-tight">AuraHealth AI</span>
+            <span className="text-[11px] font-bold text-white leading-tight">RespiGuard.ai</span>
             <span className="text-[9px] text-emerald-300 font-medium">Respiratory Agent</span>
           </div>
         </div>

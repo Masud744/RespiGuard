@@ -3,9 +3,10 @@
 > **Project Name:** RespiGuard / AuraBreath AI (Explainable AI-Powered Real-Time Portable Asthma Exacerbation Risk Prediction & Telehealth Monitoring System)  
 > **Course:** Embedded Systems & Machine Learning Project (3-2 Semester)  
 > **Target Audience:** Developers, Researchers, Embedded Engineers, ML Practitioners, and Medical Informatics Evaluators  
-> **Document Version:** 2.0.0 (Production Master)  
+> **Document Version:** 2.1.0 (Audited Master Draft — Synchronized with Revision 15 Security & Dataset Ground Truth)  
 > **Date:** September 2026  
-> **Scope:** Complete Master Technical Reference, Architecture, Dataset Lineage, ML Equations, Hardware Schematics, API Schematics & Development Guide (15+ Pages Equivalent)
+> **Scope:** Master Technical Reference, Architecture, Dataset Lineage, Verified Security Classifications, Discrepancy Register & API Schematics  
+> **Phase Status:** **ON HOLD for Production Changes** (Security Audit & Discrepancy Identification: COMPLETED; Documentation Sync: IN PROGRESS; Production Hardening: NOT IMPLEMENTED; ML Retraining: NOT STARTED)
 
 ---
 
@@ -101,10 +102,10 @@ Asthma (হাঁপানি) হলো মানব ফুসফুসের �
 
 #### প্রকল্পের প্রধান বৈশিষ্ট্যসমূহ (Key System Highlights):
 - **পোর্টেবল IoT সেন্সিং নোড:** ESP32 মাইক্রোকন্ট্রোলার, লেজার পার্টিকল সেন্সর (**PMS5003**), ডিজিটাল তাপমাত্রা ও আর্দ্রতা সেন্সর (**DHT22**), এবং ক্ষতিকর গ্যাস সেন্সর (**MQ135**)।
-- **২-ধাপের হায়ারার্কিক্যাল মেশিন লার্নিং (2-Stage Hierarchical ML):** CatBoost (Safety Gate) এবং XGBoost (Severity Triage) এর সমন্বয়ে গঠিত মডেল, যা $93.75\%$ হাই-রিস্ক রিকল অর্জন করে।
-- **ব্যাখ্যাযোগ্য এআই (TreeSHAP Explainable AI):** প্রতিটি পূর্বাভাসের জন্য গাণিতিকভাবে দেখায় কোন সেন্সরটি ঝুঁকি বাড়ানোর পেছনে কত শতাংশ দায়ী এবং স্বয়ংক্রিয়ভাবে চিকিৎসকের নির্দেশনামূলক বার্তা তৈরি করে।
-- **দ্বিমুখী ডাক্তার কনসালটেশন ও জিমেইল অটো-সিঙ্ক (Two-Way Doctor Teleconsultation with IMAP Auto-Sync):** রোগী ড্যাশবোর্ড থেকে চিকিৎসকের সাথে যোগাযোগ করতে পারেন। চিকিৎসক তার নিজস্ব জিমেইল অ্যাপ থেকে সরাসরি রিপ্লাই দিলে ব্যাকগ্রাউন্ড IMAP লিসেনার স্বয়ংক্রিয়ভাবে তা রোগীর ড্যাশবোর্ডে সিঙ্ক করে দেয়।
-- **সাইবারপাঙ্ক ডার্ক এমারেল্ড ভিজ্যুয়াল ড্যাশবোর্ড (React + Tailwind CSS):** কনসেন্ট্রিক রেডিয়াল এয়ার কোয়ালিটি গেজ, ইন্টারঅ্যাক্টিভ সেন্সর সিমুলেটর, পালস ওয়েভফর্ম এবং রিয়েল-টাইম গ্রাফ।
+- **২-ধাপের হায়ারার্কিক্যাল মেশিন লার্নিং (2-Stage Hierarchical ML — Legacy Model):** পূর্ববর্তী ট্রেইনড মডেল (`models/two_stage_asthma_model.joblib`), যা ২২ জন প্রাপ্তবয়স্ক রোগীর ডেটায় হিস্টোরিক্যালি ৯৩.৭৫% হাই-রিস্ক রিকল অর্জন করে বলে নথিবদ্ধ। (সতর্কবার্তা: বর্তমান পাইথন এনভায়রনমেন্টে CatBoost অনুপস্থিত থাকলে স্বয়ংক্রিয়ভাবে ফলব্যাক Random Forest ব্যবহৃত হয়; পেডিয়াট্রিক ডাটা $N=0$ হওয়ায় শিশু রোগীদের ক্ষেত্রে এই মডেলের ইনফারেন্স অপ্রমাণিত OOD। নতুন মডেল ট্রেইনিং: NOT STARTED)।
+- **ব্যাখ্যাযোগ্য এআই (TreeSHAP Explainable AI):** প্রতিটি পূর্বাভাসের জন্য গাণিতিকভাবে দেখায় কোন সেন্সরটি ঝুঁকি বাড়ানোর পেছনে কত শতাংশ দায়ী এবং চিকিৎসকের নির্দেশনামূলক ড্রাফট বার্তা তৈরি করে।
+- **দ্বিমুখী ডাক্তার কনসালটেশন (ডুয়েল-টোকেন আর্কিটেকচার — Planned):** চিকিৎসকের ইমেইল রিপ্লাই গ্রহণের সিকিউরড প্রোটোকল। (সতর্কবার্তা: বর্তমান আনহার্ডেনড প্রোডাকশন কোডে টোকেন ভ্যালিডেশন অনুপস্থিত থাকায় অনিবন্ধিত ইনজেকশন সম্ভব; ডুয়েল অ্যাকশন-টোকেন কনসাম্পশন রেফারেন্স এনভায়রনমেন্টে টেস্টেড ও ভেরিফায়েড, প্রোডাকশন হার্ডেনিং: NOT IMPLEMENTED)।
+- **সাইবারপাঙ্ক ডার্ক এমারেল্ড ভিজ্যুয়াল ড্যাশবোর্ড (React + Tailwind CSS):** কনসেন্ট্রিক রেডিয়াল এয়ার কোয়ালিটি গেজ, সিন্থেটিক অ্যাডহ্যারেন্স হিস্ট্রি চার্ট, স্ট্যাটিক মক অ্যালার্ট কার্ড এবং ইন্টারঅ্যাক্টিভ সেন্সর সিমুলেটর।
 
 ```
 +-----------------------------------------------------------------------------------------+
@@ -113,26 +114,28 @@ Asthma (হাঁপানি) হলো মানব ফুসফুসের �
 |                                                                                         |
 |  [ESP32 IoT Node] / [Python Sensor Simulator]                                           |
 |         │                                                                               |
-|         │  HTTP POST /api/telemetry (প্রতি ৩০ সেকেন্ডে সেন্সর ডেটা)                      |
+|         │  HTTP POST /api/telemetry (প্রতি ৩০ সেকেন্ডে সেন্সর ডেটা — Unhardened in Prod) |
 |         ▼                                                                               |
 |  +-----------------------------------------------------------------------------------+  |
 |  |                             FastAPI Backend Server                                |  |
 |  |  +---------------------------+  +----------------------+  +---------------------+  |  |
 |  |  | 2-Stage ML Pipeline       |  | TreeSHAP Engine      |  | Auth & OTP Manager  |  |  |
-|  |  | (CatBoost + XGBoost)      |  | (Feature Impacts)    |  | (Gmail SMTP 587)    |  |  |
+|  |  | (Legacy Model Bundle)     |  | (Feature Impacts)    |  | (DISC-01 Defect)    |  |  |
 |  |  +---------------------------+  +----------------------+  +---------------------+  |  |
 |  |  +---------------------------+  +----------------------+  +---------------------+  |  |
 |  |  | Background IMAP Worker    |  | Supabase REST Client |  | Alert Dispatcher    |  |  |
-|  |  | (Auto-Sync Doctor Emails) |  | (PostgreSQL Cloud)   |  | (Red-Alert Emails)  |  |  |
+|  |  | (Auto-Sync Doctor Emails) |  | (PostgREST Client)   |  | (Red-Alert Emails)  |  |  |
 |  |  +---------------------------+  +----------------------+  +---------------------+  |  |
 |  +-----------------------------------------------------------------------------------+  |
 |         │                                              │                                │
 |         ▼                                              ▼                                ▼
-|  [Supabase Database]                         [React Vite Dashboard]           [Doctor's Gmail]
-|  - user_profiles                             - Emerald Dark Theme             - Email with PID
-|  - telemetry_readings                        - Radial Air Rings               - Direct Reply ->
-|  - patient_doctors                           - XAI Waterfall Cards              IMAP Auto-Sync
-|  - doctor_messages                           - Interactive Simulators                          |
+|  [Supabase Database Status]                  [React Vite Dashboard]           [Doctor's Gmail]
+|  - Code Targets: user_profiles,              - Emerald Dark Theme             - Email with PID
+|    telemetry_readings, patient_doctors,      - Radial Air Rings               - Direct Reply ->
+|    doctor_messages (Unhardened)              - XAI Waterfall Cards              IMAP Auto-Sync
+|  - Planned Secured Schema: 10 RLS            - Synthetic History (DISC-03)     (Token Verification
+|    policies & CAS (Reference Confirmed)      - Mock Alerts Feed (DISC-02)       Pending Prod Hardening)
+|  - Cloud State: Unverified / Unremediated    - Client Zero-Token IDOR (DISC-04)                 |
 +-----------------------------------------------------------------------------------------+
 ```
 
@@ -225,10 +228,18 @@ $$R_s = \left( \frac{V_{in} - V_{out}}{V_{out}} \right) \cdot R_L, \quad \text{P
 RespiGuard সিস্টেমের ডেটাসেটটি আন্তর্জাতিকভাবে স্বীকৃত ক্লিনিক্যাল রিসার্চ এবং আইইইই পেপারের ওপর ভিত্তি করে প্রস্তুত করা হয়েছে:
 
 1. **University of Edinburgh AAMOS-00 Clinical Study Dataset (*Nature Scientific Data 2023*)**
-   - **অফিসিয়াল এডিনবরা ডেটাশেয়ার লিংক:** [https://datashare.ed.ac.uk/handle/10283/4761](https://datashare.ed.ac.uk/handle/10283/4761)
-   - **DOI / Persistent Identifier:** `10.1038/s41597-023-02100-y` / `DS_10283_4761`
-   - **Nature প্রকাশনা জার্নাল লিংক:** [Nature Scientific Data Paper Link](https://www.nature.com/articles/s41597-023-02100-y)
-   - **বিবরণ:** এই ক্লিনিক্যাল গবেষণায় স্কটল্যান্ডের একাধিক অঞ্চলের দীর্ঘমেয়াদী অ্যাজমা রোগীদের দৈনিক স্পাইরোমেট্রি ডেটা ($PEF$), ঘণ্টার ভিত্তিতে পরিবেশগত আবহাওয়া ($PM_{2.5}, PM_{10}$, তাপমাত্রা, আর্দ্রতা, বায়ুচাপ) এবং রোগীর বিস্তারিত স্বাস্থ্য তথ্য সংগ্রহ করা হয়েছে।
+   - **প্রাতিষ্ঠানিক সাইটেশন:** *The AAMOS-00 dataset: Longitudinal data on asthma self-management, exacerbation, and environmental exposures.* Nature Scientific Data 10, Article number: 210 (2023).
+   - **DOI / Persistent Identifier:** [`10.1038/s41597-023-02100-y`](https://doi.org/10.1038/s41597-023-02100-y)
+   - **এডিনবরা ডেটাশেয়ার লিংক:** [`DS_10283_4761`](https://datashare.ed.ac.uk/handle/10283/4761)
+   - **জার্নাল পেপার লিংক:** [Nature Scientific Data Paper Link](https://www.nature.com/articles/s41597-023-02100-y)
+   - **প্রকৃত কোহোর্ট অন্তর্ভুক্তি মানদণ্ড ও ডেমোগ্রাফিক বিশ্লেষণ (Ground Truth):**
+     - ক্লিনিক্যাল ট্রায়াল প্রোটোকল অনুযায়ী শুধুমাত্র $\ge ১৮$ বছর বয়সী প্রাপ্তবয়স্ক রোগী অন্তর্ভুক্ত করা হয়েছিল যারা মোবাইল অ্যাপ ব্যবহারে সক্ষম।
+     - মূল সোর্স ডেমোগ্রাফিক ফাইল (`datasets/raw/anonym_aamos00_patient_info.csv`) সরাসরি যাচাই করে দেখা গেছে অংশগ্রহণকারী রোগীর সংখ্যা সুনির্দিষ্টভাবে **২২ জন প্রাপ্তবয়স্ক** ($N=22$); তাদের বয়সসীমা: `18-29yo` (৩ জন), `30-39yo` (৯ জন), `40-49yo` (৬ জন), `50+yo` (৪ জন)।
+     - এই ডেটাসেটে **০ জন পেডিয়াট্রিক রোগী** রয়েছে ($N=0$ pediatric records across 1,830 daily monitoring records)।
+   - **ডেটাসেটের সীমাবদ্ধতা বনাম প্ল্যাটফর্ম এলিজিবিলিটি পলিসির পার্থক্য:**
+     - *মডেলের পরিসংখ্যানগত সীমাবদ্ধতা:* ডেটাসেটে কোনো শিশু বা কিশোরের রেকর্ড না থাকায় পেডিয়াট্রিক রোগীদের ক্ষেত্রে মডেলের পূর্বাভাস চালানো সম্পূর্ণ **আনভ্যালিডেটেড আউট-অফ-ডিস্ট্রিবিউশন (OOD)** মূল্যায়ন।
+     - *প্ল্যাটফর্ম ইঞ্জিনিয়ারিং পলিসি:* `CHECK (age >= 18.0 AND age <= 120.0)` কনস্ট্রেইন্ট বা `HTTP 422 Unprocessable Entity` রেসপন্স কোনো সার্বজনীন চিকিৎসাগত সত্য নয়; বরং এটি প্ল্যাটফর্মের একটি ইঞ্জিনিয়ারিং বাউন্ডারি সেফগার্ড যাতে মডেলটিকে তার অনুপযুক্ত পপুলেশনে না চালানো হয়।
+     - *আনুষ্ঠানিক শ্রেণিবিভাগ:* **`[DOMAIN MODEL TRAINING LIMITATION DOCUMENTED & SCIENTIFIC CITATION VERIFIED]`**।
 
 2. **IEEE Access (2021) "Machine Learning-Based Asthma Risk Prediction Using IoT and Smartphone Applications"**
    - **অফিসিয়াল IEEE Xplore পেপার লিংক:** [https://ieeexplore.ieee.org/document/9380628](https://ieeexplore.ieee.org/document/9380628)
@@ -346,11 +357,16 @@ $$P(\text{Green} \mid \mathbf{x}) = P_{S1}(\text{Safe} \mid \mathbf{x})$$
 $$P(\text{Yellow} \mid \mathbf{x}) = P_{S1}(\text{At-Risk} \mid \mathbf{x}) \cdot P_{S2}(\text{Moderate} \mid \mathbf{x})$$
 $$P(\text{Red} \mid \mathbf{x}) = P_{S1}(\text{At-Risk} \mid \mathbf{x}) \cdot P_{S2}(\text{Severe} \mid \mathbf{x})$$
 
-#### চূড়ান্ত পারফরম্যান্স (`train_2stage_pipeline.py`):
-- **সামগ্রিক নির্ভুলতা (Overall Accuracy):** $\mathbf{87.50\%}$
-- **ম্যাক্রো F1-স্কোর:** $\mathbf{0.8124}$
-- **উচ্চ ঝুঁকি (Red Class) রিকল:** $\mathbf{93.75\%}$
-- মডেল বান্ডেলটি `two_stage_asthma_model.joblib` ফাইলে সংরক্ষিত হয়।
+#### হিস্টোরিক্যাল মডেল পারফরম্যান্স (Historical / Reported Legacy Model Metrics):
+- **ঐতিহাসিক নথিবদ্ধ নির্ভুলতা (Reported Overall Accuracy):** $\mathbf{87.50\%}$
+- **ঐতিহাসিক ম্যাক্রো F1-স্কোর (Reported Macro F1):** $\mathbf{0.8124}$
+- **ঐতিহাসিক উচ্চ ঝুঁকি রিকল (Reported Red Class Recall):** $\mathbf{93.75\%}$
+- **মডেলের উৎস ও পর্যায়গত সত্যতা (Model Provenance & Execution Boundary):**
+  - এই মেট্রিক্সগুলো রিপোজিটরিতে সংরক্ষিত **পূর্ববর্তী ট্রেইনড মডেলের** (`models/two_stage_asthma_model.joblib`), যা AAMOS-00 ডেটাসেটের ২২ জন প্রাপ্তবয়স্কের তথ্যে ট্রেইন করা হয়েছিল।
+  - **Not newly trained in this phase:** এই অডিট ও ডকুমেন্টেশন পর্যায়ে কোনো নতুন মডেল ট্রেইনিং বা রিট্রেইনিং করা হয়নি।
+  - **Not independently reproduced or newly validated in this phase:** এই পারফরম্যান্স মেট্রিক্স বর্তমান পর্যায়ে নতুন করে ভ্যালিডেট বা পুনরুৎপাদন করা হয়নি (`ML implementation and retraining: NOT STARTED`)।
+  - **রানটাইম ফলব্যাক:** সক্রিয় ভার্চুয়াল এনভায়রনমেন্টে CatBoost মডিউল না থাকলে সিস্টেম স্বয়ংক্রিয়ভাবে বেসলাইন `models/random_forest_asthma.joblib` মডেলে ফলব্যাক করে।
+  - মডেল বান্ডেল ফাইল: `models/two_stage_asthma_model.joblib`।
 
 ---
 
@@ -391,37 +407,81 @@ backend/
 └── requirements.txt     # পাইথন ডিপেন্ডেন্সি প্যাকেজ
 ```
 
-### 7.2 ডাটাবেজ রিলেশনাল ডায়াগ্রাম (ERD):
-```
-[USER_PROFILES] (id PK, email UK, password_hash, full_name, severity, age, pef_best, created_at)
-       │  1
-       ├───< N [PATIENT_DOCTORS] (id PK, user_id FK, doctor_name, doctor_email, patient_id_code, created_at)
-       │              │ 1
-       │              └───< N [DOCTOR_MESSAGES] (id PK, user_id FK, doctor_id FK, sender_type, message_body)
-       │  1
-       └───< N [TELEMETRY_READINGS] (id PK, user_id FK, device_node, temp, hum, pms, mq135, predicted_risk)
-```
+### 7.2 ডাটাবেজ আর্কিটেকচার ও স্কিমা ড্রিফ্ট (Database Architecture & Tripartite State Separation):
 
-### 7.3 প্রধান REST API এন্ডপয়েন্টস:
+ডাটাবেজের প্রকৃত অবস্থা মূল্যায়নের জন্য তিনটি স্তরকে স্পষ্টভাবে পৃথক করা আবশ্যক:
 
-| মেথড | এন্ডপয়েন্ট | বিবরণ | রিকোয়েস্ট বডি | রেসপন্স সারসংক্ষেপ |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | রুট সার্ভিস হেলথ চেক | None | `{"service": "RespiGuard", "status": "online"}` |
-| `GET` | `/api/health` | সামগ্রিক মডেল ও ডিবি স্ট্যাটাস | None | `{"status": "healthy", "model": "2-Stage CatBoost+XGBoost"}` |
-| `POST` | `/api/auth/send-otp` | জিমেইল SMTP এর মাধ্যমে ৬-সংখ্যার OTP পাঠানো | `{"email", "full_name"}` | `{"success": true, "status": "sent"}` |
-| `POST` | `/api/auth/verify-otp` | OTP কোড যাচাইকরণ | `{"email", "otp"}` | `{"success": true, "message": "Email verified"}` |
-| `POST` | `/api/auth/signup` | Supabase এ নতুন অ্যাকাউন্ট রেজিস্ট্রেশন | Signup JSON | `{"success": true, "user": {...}}` |
-| `POST` | `/api/auth/login` | PBKDF2 হ্যাশ যাচাই করে লগইন | `{"email", "password"}` | `{"success": true, "user": {...}}` |
-| `POST` | `/api/telemetry` | ৩০ সেকেন্ডের সেন্সর ডেটা গ্রহণ ও প্রেডিকশন | TelemetryInput JSON | `{"status": "success", "prediction": {...}}` |
-| `GET` | `/api/telemetry/latest` | ফ্রন্টএন্ডের জন্য দ্রুত ৩ সেকেন্ডে লাইভ ডেটা | None | `{"telemetry": {...}, "prediction": {...}}` |
-| `GET` | `/api/telemetry/history` | অতীতের টাইম-সিরিজ ডেটা | `limit=30` | `{"data": [...], "count": 30}` |
-| `POST` | `/api/predict` | একক প্রেডিকশন ও SHAP বিশ্লেষণ | TelemetryInput JSON | সম্পূর্ণ SHAP ওয়াটারফল ও সম্ভাবনা |
-| `GET` | `/api/global-importance` | গ্লোবাল TreeSHAP র্যাঙ্কিং | None | `{"importance": [...]}` |
-| `GET` | `/api/stats` | নোড ও সামগ্রিক মেট্রিক্স | None | `{"device_status": {...}, "metrics": {...}}` |
-| `POST` | `/api/doctors` | ডাক্তারের তথ্য যুক্ত করা (Patient ID সহ) | Doctor Registration JSON | `{"success": true, "doctor": {...}}` |
-| `GET` | `/api/doctors` | রোগীর নিবন্ধিত ডাক্তারদের তালিকা | `user_id` query param | `{"doctors": [...]}` |
-| `POST` | `/api/messages/send` | ডাক্তারকে ইমেইলসহ মেসেজ পাঠানো | Message JSON | `{"success": true, "email_status": "sent"}` |
-| `GET` | `/api/messages` | কনভার্সেশন থ্রেড রিড করা | `user_id`, `doctor_id?` | `{"messages": [...]}` |
+#### ১. বর্তমান প্রোডাকশন কোডবেসের আচরণ (Current Production Codebase Behavior):
+- **টার্গেট টেবিলসমূহ:** `user_profiles`, `patient_doctors`, `doctor_messages`, `telemetry_readings`
+- **সংযোগ পদ্ধতি:** `backend/db_service.py` সরাসরি ক্লাউড PostgREST এন্ডপয়েন্টে `SUPABASE_ANON_KEY` দিয়ে কল করে (`HEADERS = {"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}"}`)।
+- **কোডবেস সীমাবদ্ধতা:** কোড লেভেলে কোনো ব্যাকএন্ড JWT ইউজার ভ্যালিডেশন, সার্ভার-সাইড রোল চেকিং, বা ওনারশিপ গার্ড নেই। র' `user_id` পাস করা হয়। `doctor_profiles`, `devices`, বা অ্যাকশন-টোকেন টেবিলের কোনো রেফারেন্স বর্তমান পাইথন কোডে নেই।
+
+#### ২. পরিকল্পিত সিকিউরড রেফারেন্স আর্কিটেকচার (Planned Secured Reference Schema):
+- **টার্গেট স্কিমা (`scratch/migrations/20260917_001_initial_schema.sql`):**
+  - রিলেশনশিপ টেবিলকে `patient_doctor_relationships` হিসেবে পুনর্গঠিত করা হয়েছে।
+  - নতুন টেবিল: `doctor_profiles`, `devices`, `doctor_action_tokens`, `revoked_tokens`।
+- **সিকিউরিটি কন্ট্রোল:** ক্যাটালগ অডিটে এক্সাক্ট ১০টি সক্রিয় RLS পলিসি, কলাম-লেভেল প্রিভিলেজ (অ্যান্টি-রোল এসকেলেশন), ৫-সেকেন্ড কমিট ল্যাটেন্সি চেক (`chk_timestamp_order`), এবং হার্ডওয়্যার সিকোয়েন্স CAS ইউনিক কনস্ট্রেইন্ট (`uq_device_seq`)।
+- **ভেরিফিকেশন স্ট্যাটাস:** আইসোলেটেড PostgreSQL 15.19 কন্টেইনারে সম্পূর্ণ টেস্টেড ও ভেরিফায়েড (`[REFERENCE-ENV CONFIRMED]`)।
+
+#### ৩. লাইভ ক্লাউড ডাটাবেজ অবস্থা (Unverified / Unremediated Production Cloud State):
+- **ক্লাউড স্ট্যাটাস:** তদারককারীর কঠোর **HOLD** নির্দেশের কারণে লাইভ Supabase ক্লাউড প্রজেক্টে এই অডিটের সময় কোনো মাইগ্রেশন DDL চালানো হয়নি।
+- **স্বীকৃত সীমাবদ্ধতা:** লাইভ ক্লাউড ডাটাবেজের প্রকৃত RLS পলিসি ও প্রিভিলেজ সরাসরি ক্লাউড ক্যাটালগ থেকে পরীক্ষা করা হয়নি বিধায় তা **আনভেরিফায়েড ও আনরিমিডিয়েটেড** (`[REMEDIATION NOT IMPLEMENTED]`) হিসেবে চিহ্নিত।
+
+### 7.3 প্রধান REST API এন্ডপয়েন্টস ও অডিট শ্রেণিবিভাগ (Complete 23-Route Inventory):
+
+| মেথড | এন্ডপয়েন্ট | বিবরণ | অপারেশনাল স্ট্যাটাস ও অডিট শ্রেণিবিভাগ | রিকোয়েস্ট বডি / প্যারামিটার | রেসপন্স / ত্রুটির নোটস |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/` | রুট সার্ভিস হেলথ চেক | **Existing implementation — not security-hardened** | None | `{"service": "RespiGuard", "status": "online"}` |
+| `GET` | `/api/health` | সামগ্রিক মডেল ও ডিবি স্ট্যাটাস | **Vulnerable behavior present in production codebase (CWE-200)** | None | টেবিল তালিকা এক্সপোজ করে (তথ্য প্রকাশ ঝুঁকি) |
+| `POST` | `/api/auth/send-otp` | ৬-সংখ্যার ইমেইল OTP ডিসপ্যাচ | **Known defect / latent runtime crash (CWE-754 / DISC-01)** | `{"email", "full_name"}` | `AttributeError: email_exists` $\rightarrow$ `HTTP 500` |
+| `POST` | `/api/auth/verify-otp` | মেমোরি OTP কোড যাচাই | **Existing implementation — not security-hardened** | `{"email", "otp"}` | যাচাই সফল হলেও সেশন টোকেন প্রদান করে না |
+| `POST` | `/api/auth/signup` | নতুন অ্যাকাউন্ট রেজিস্ট্রেশন | **Existing implementation — not security-hardened** | Signup JSON | পেডিয়াট্রিক এইজ ভ্যালিডেশন ও পাসওয়ার্ড পলিসিহীন |
+| `POST` | `/api/auth/login` | ক্রেডেনশিয়াল ভ্যালিডেশন | **Existing implementation — not security-hardened (CWE-307)** | `{"email", "password"}` | রেট লিমিটিং অনুপস্থিত; JWT টোকেন ইস্যু করে না |
+| `GET` | `/api/auth/me` | প্রোফাইল ডেটা রিড | **Vulnerable behavior present in production codebase (CWE-639)** | `user_id` query param | ক্রিটিক্যাল IDOR: যেকোনো ইউজারের প্রোফাইল এক্সপোজড |
+| `POST` | `/api/doctors` | ডক্টর লিংক তৈরি | **Vulnerable behavior present in production codebase (CWE-285)** | Doctor JSON | অথেনটিকেশন ও ওনারশিপ চেকিং অনুপস্থিত |
+| `GET` | `/api/doctors` | ডক্টর ডিরেক্টরি ফেচ | **Vulnerable behavior present in production codebase (CWE-639)** | `user_id` query param | টেন্যান্ট আইসোলেশনহীন ডিরেক্টরি এনিউমারেশন |
+| `DELETE` | `/api/doctors/{id}` | ডক্টর রিলেশনশিপ ডিলিট | **Vulnerable behavior present in production codebase (CWE-285)** | `user_id` query param | অথেনটিকেশন ছাড়া যে কেউ রিলেশনশিপ মুছতে পারে |
+| `POST` | `/api/messages/send` | ডক্টরকে মেসেজ প্রেরণ | **Vulnerable behavior present in production codebase (CWE-284)** | Message JSON | সেন্ডার আইডেন্টিটি ভ্যালিডেশন নেই (সেন্ডার জালিয়াতি) |
+| `POST` | `/api/messages/reply` | ডক্টর অ্যাডভাইজরি ইনজেকশন | **Vulnerable behavior present in production codebase (CWE-306)** | Reply JSON | আনঅথেনটিকেটেড অ্যাডভাইজরি ইনজেকশন। রেফারেন্স ডুয়েল-টোকেন ভেরিফায়েড; প্রোডাকশন হার্ডেনিং: NOT IMPLEMENTED |
+| `GET` | `/api/messages` | কনভার্সেশন থ্রেড রিড | **Vulnerable behavior present in production codebase (CWE-639)** | `user_id`, `doctor_id?` | ক্রস-টেন্যান্ট প্রাইভেট ক্লিনিক্যাল মেসেজ ডিসক্লোজার |
+| `POST` | `/api/messages/sync` | ম্যানুয়াল IMAP সিঙ্ক ট্রিগার | **Existing implementation — not security-hardened** | None | ব্যাকগ্রাউন্ড থ্রেড সিঙ্ক ট্রিগার |
+| `PATCH` | `/api/messages/{id}/read` | মেসেজ রিড স্ট্যাটাস মিউটেশন | **Vulnerable behavior present in production codebase (CWE-285)** | `user_id` query param | ওনারশিপ ভ্যালিডেশন ছাড়া মেসেজ স্টেট মিউটেশন |
+| `POST` | `/api/predict` | একক প্রেডিকশন ও SHAP ব্যাখ্যা | **Existing implementation — legacy model dependency** | TelemetryInput JSON | পূর্ববর্তী ট্রেইনড মডেল / RF ফলব্যাক দিয়ে রান করে |
+| `POST` | `/api/telemetry` | ৩০-সেকেন্ডের সেন্সর ইনজেশন | **Vulnerable behavior present in production codebase (CWE-287)** | TelemetryInput JSON | ডিভাইস আইডেন্টিটি স্পুফিং ঝুঁকি। সিকোয়েন্স CAS ও টাইমস্ট্যাম্প লিমিট রেফারেন্স ভেরিফায়েড; প্রোডাকশন ভ্যালিডেশন পেন্ডিং |
+| `GET` | `/api/telemetry/latest` | লাইভ ফ্রন্টএন্ড পোলিং স্টেট | **Existing implementation — not security-hardened** | None | গ্লোবাল মেমোরি স্টেট রিটার্ন করে (আনঅথেনটিকেটেড) |
+| `GET` | `/api/telemetry/history` | অতীতের টাইম-সিরিজ ডেটা | **Vulnerable behavior present in production codebase (CWE-639)** | `user_id?`, `limit` | আনঅথেনটিকেটেড কোয়েরি; ক্লায়েন্ট `user_id` গ্রহণ করে |
+| `GET` | `/api/global-importance` | গ্লোবাল TreeSHAP র্যাঙ্কিং | **Existing implementation — legacy model dependency** | None | ডেটাসেট লেভেল গড় শ্যাপলি মান প্রদর্শন করে |
+| `GET` | `/api/stats` | নোড ও সামগ্রিক মেট্রিক্স | **Existing implementation — not security-hardened** | None | মেমোরি ফ্রেম কাউন্টার ও ডিভাইসের স্ট্যাটাস প্রদর্শন |
+| `GET` | `/api/history` | অ্যাডহ্যারেন্স হিস্ট্রি চার্ট | **Synthetic adherence generator (DISC-03)** | `timeframe`, `limit` | র’ CSV থেকে সাইন/কোসাইন গাণিতিক ফর্মুলায় হিসাবকৃত |
+| `GET` | `/api/alerts` | ক্লিনিক্যাল অ্যাডভাইজরি ফিড | **Static mock endpoint — no live database queries (DISC-02)** | None | ফিক্সড ৩-এলিমেন্টের স্ট্যাটিক মক অ্যারে রিটার্ন করে |
+
+---
+
+### 7.4 Authentication & Client Session Architecture (DISC-04 & DISC-01):
+
+#### ১. বর্তমান কোডবেস ও ক্লায়েন্ট ফ্রন্টএন্ডের অবস্থা (Current Codebase Reality):
+- **জিরো-টোকেন ক্লায়েন্ট সারফেস (Zero-Token IDOR Surface):** ফ্রন্টএন্ড এপিআই ক্লায়েন্ট (`frontend/src/api.js`) কোনো `Authorization: Bearer` হেডার পাঠায় না (০টি টোকেন হেডার)।
+- **আনএনক্রিপ্টেড লোকাল স্টোরেজ:** লগইনের পর ব্যবহারকারীর সম্পূর্ণ প্রোফাইল অবজেক্ট প্লেইনটেক্সট JSON হিসেবে ব্রাউজারের `localStorage`-এ সংরক্ষিত থাকে (`localStorage.setItem('respiguard_user', ...)` )।
+- **র' ইউজার আইডি নির্ভরতা:** ডেটা ফেচিং বা মিউটেশনের সময় সরাসরি কোয়েরি স্ট্রিং (`?user_id=${userId}`) বা রিকোয়েস্ট বডিতে ক্লায়েন্ট-নিয়ন্ত্রিত `user_id` পাঠানো হয়, যা সম্পূর্ণ অ্যাপ্লিকেশন জুড়ে IDOR (CWE-639) তৈরি করে।
+- **ওটিপি ক্র্যাশ ডিফেক্ট (DISC-01):** `POST /api/auth/send-otp` এন্ডপয়েন্টে মেথড অনুপস্থিতির কারণে `AttributeError: email_exists` ত্রুটি ঘটে এবং আনহ্যান্ডল্ড `500 Internal Server Error` রিটার্ন করে।
+
+#### ২. পরিকল্পিত ক্রিপ্টোগ্রাফিক সেশন আর্কিটেকচার (Planned Hardening — Remediation Pending):
+- ব্যাকএন্ড থেকে ক্রিপ্টোগ্রাফিক সই করা JWT অ্যাক্সেস টোকেন (১৫ মিনিট মেয়াদ) ও রিফ্রেশ টোকেন প্রদান।
+- ফ্রন্টএন্ডে `Authorization: Bearer <token>` হেডার বাধ্যতামূলক করা এবং সার্ভার-সাইডে টোকেন যাচাই।
+- স্ট্যাটাস: **`[REMEDIATION NOT IMPLEMENTED]`** (তদারককারীর অনুমোদনের অপেক্ষায় স্থগিত)।
+
+---
+
+### 7.5 Background Non-Blocking IMAP Auto-Sync Worker:
+
+#### ১. বর্তমান কোডবেস আচরণ (Current Codebase Behavior):
+- `backend/imap_listener.py` একটি ব্যাকগ্রাউন্ড ডেমন থ্রেড হিসেবে রান করে এবং প্রতি ৬ সেকেন্ড পর পর জিমেইল ইনবক্সে `[Patient ID: ...]` ফরম্যাটের সাবজেক্টযুক্ত রিপ্লাই মেইল স্ক্যান করে।
+- স্ক্যানকৃত মেসেজ বডি সরাসরি `POST /api/messages/reply` এন্ডপয়েন্টে পাঠানো হয়।
+
+#### ২. নিরাপত্তা ঝুঁকি ও পরিকল্পিত রেফারেন্স আর্কিটেকচার (Security Gap & Planned Protocol):
+- **বর্তমান ঝুঁকি:** প্রোডাকশন `POST /api/messages/reply` এন্ডপয়েন্টে বর্তমানে কোনো ডক্টর সেশন বা অ্যাকশন টোকেন যাচাই করা হয় না (`ASSERT-PROD-06` / CWE-306)। ফলে যেকোনো বহিরাগত কলকারী আনঅথেনটিকেটেড অ্যাডভাইজরি ইনজেক্ট করতে পারে।
+- **পরিকল্পিত ডুয়েল-টোকেন প্রোটোকল:** রেফারেন্স এনভায়রনমেন্টে একটি সিঙ্গেল-ইউজ স্টেটফুল অ্যাকশন টোকেন (`WHERE token_hash = :hash AND consumed_at IS NULL`) সফলভাবে টেস্ট করা হয়েছে (`[REFERENCE-ENV CONFIRMED]`)।
+- **প্রোডাকশন স্ট্যাটাস:** **`[REMEDIATION NOT IMPLEMENTED]`**।
 
 ---
 

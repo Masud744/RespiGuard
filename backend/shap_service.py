@@ -21,6 +21,7 @@ class AsthmaXAIService:
         self.stage1_model = None
         self.stage2_model = None
         self.fallback_rf = None
+        self.tree_explainer = None
         
         self.dataset_df = None
         self.global_importance = None
@@ -73,6 +74,12 @@ class AsthmaXAIService:
         if self.stage1_model is None and os.path.exists(rf_path):
             print(f"[XAI Service] Loading fallback Random Forest model from: {rf_path}")
             self.fallback_rf = joblib.load(rf_path)
+            try:
+                self.tree_explainer = shap.TreeExplainer(self.fallback_rf)
+                print("[XAI Service] Genuine TreeSHAP TreeExplainer initialized successfully.")
+            except Exception as e:
+                print(f"[XAI Service] TreeExplainer initialization warning: {e}")
+                self.tree_explainer = None
 
         # 2. Load Dataset
         if os.path.exists(dataset_path):
@@ -190,21 +197,44 @@ class AsthmaXAIService:
 
         pred_label = self.classes[pred_idx]
 
-        # Calculate feature contributions for the ambient sensors
+        # Calculate feature contributions (Genuine TreeSHAP with heuristic fallback)
         feature_impacts = []
-        temp_impact = (25.0 - temp) * 0.04 if temp < 20 else (temp - 25.0) * 0.02
-        hum_impact = (hum - 50.0) * 0.015 if hum > 60 else (40.0 - hum) * 0.01
-        pm25_impact = (pm2_5 - 10.0) * 0.035 if pm2_5 > 12 else -0.15
-        pm10_impact = (pm10 - 20.0) * 0.015 if pm10 > 25 else -0.08
-        pm1_impact = (pm1_0 - 8.0) * 0.025 if pm1_0 > 10 else -0.06
+        using_model_shap = False
+        raw_impacts = {}
 
-        raw_impacts = {
-            'pm2_5': pm25_impact,
-            'temperature': temp_impact,
-            'humidity': hum_impact,
-            'pm10': pm10_impact,
-            'pm1_0': pm1_impact
-        }
+        if self.tree_explainer is not None and self.fallback_rf is not None:
+            try:
+                rf_df = input_df[self.feature_cols]
+                shap_vals_raw = self.tree_explainer.shap_values(rf_df)
+                if isinstance(shap_vals_raw, list):
+                    class_shap = shap_vals_raw[pred_idx][0]
+                elif hasattr(shap_vals_raw, 'shape') and len(shap_vals_raw.shape) == 3:
+                    class_shap = shap_vals_raw[0, :, pred_idx]
+                else:
+                    class_shap = shap_vals_raw[0]
+
+                raw_impacts = {
+                    feat: float(class_shap[i])
+                    for i, feat in enumerate(self.feature_cols)
+                }
+                using_model_shap = True
+            except Exception as e:
+                print(f"[XAI Service] TreeExplainer calculation fallback: {e}")
+                using_model_shap = False
+
+        if not using_model_shap:
+            temp_impact = (25.0 - temp) * 0.04 if temp < 20 else (temp - 25.0) * 0.02
+            hum_impact = (hum - 50.0) * 0.015 if hum > 60 else (40.0 - hum) * 0.01
+            pm25_impact = (pm2_5 - 10.0) * 0.035 if pm2_5 > 12 else -0.15
+            pm10_impact = (pm10 - 20.0) * 0.015 if pm10 > 25 else -0.08
+            pm1_impact = (pm1_0 - 8.0) * 0.025 if pm1_0 > 10 else -0.06
+            raw_impacts = {
+                'pm2_5': pm25_impact,
+                'temperature': temp_impact,
+                'humidity': hum_impact,
+                'pm10': pm10_impact,
+                'pm1_0': pm1_impact
+            }
 
         abs_sum = sum(abs(v) for v in raw_impacts.values())
         if abs_sum == 0:
@@ -227,7 +257,7 @@ class AsthmaXAIService:
         feature_impacts.sort(key=lambda x: abs(x["shap_value"]), reverse=True)
 
         explanation_text, recommendation = self._generate_clinical_narrative(
-            pred_label, feature_impacts, input_dict
+            pred_label, feature_impacts, input_dict, using_model_shap=using_model_shap
         )
 
         return {
@@ -244,34 +274,65 @@ class AsthmaXAIService:
             "feature_impacts": feature_impacts,
             "explanation": explanation_text,
             "recommendation": recommendation,
+            "disclaimer": "Feasibility experiment output only; not clinically validated or intended for medical diagnosis.",
+            "provenance": {
+                "model_type": "RandomForestClassifier (100 Trees)",
+                "xai_engine": "Model-Derived TreeSHAP (shap.TreeExplainer)" if using_model_shap else "Clinical Heuristic Indicators",
+                "is_model_derived": using_model_shap,
+                "is_rule_based_fallback": not using_model_shap,
+                "attribution_method": "Exact Path-Dependent Tree Shapley Values" if using_model_shap else "Domain Sensitivity Heuristic",
+                "feature_schema": self.feature_cols
+            },
             "telemetry": input_dict
         }
 
-    def _generate_clinical_narrative(self, pred_label, feature_impacts, telemetry):
+    def _generate_clinical_narrative(self, pred_label, feature_impacts, telemetry, using_model_shap=True):
         top_driver = feature_impacts[0]
         second_driver = feature_impacts[1] if len(feature_impacts) > 1 else None
 
-        patient_context = f" [Patient: {telemetry['severity']} Asthma | Age: {telemetry['age_range']}]"
+        patient_context = f" [Context: {telemetry.get('severity', 'Mild')} Asthma | Age: {telemetry.get('age_range', '18-29yo')}]"
+        engine_tag = "Model-Derived TreeSHAP" if using_model_shap else "Heuristic Feature Indicators"
 
+        # Construct specific clinical guidance based on top feature
+        feat_key = top_driver['feature']
+        feat_val = top_driver['value']
+        
+        advice_list = []
+        if 'pm' in feat_key:
+            advice_list.append("Elevated particulate matter detected. Activate indoor HEPA air purification, close windows, and keep your rescue inhaler at hand.")
+        elif feat_key == 'temperature':
+            if feat_val < 20.0:
+                advice_list.append("Cold ambient air can trigger bronchoconstriction. Keep airways shielded with a scarf when outdoors.")
+            else:
+                advice_list.append("High ambient temperature can worsen airway reactivity. Stay hydrated in air-conditioned environments.")
+        elif feat_key == 'humidity':
+            if feat_val > 65.0:
+                advice_list.append("High humidity promotes mold and dust mite proliferation. Utilize dehumidification to target 40%–50% relative humidity.")
+            else:
+                advice_list.append("Dry air can irritate bronchial linings. Keep hydration levels optimal and avoid dusty environments.")
+        
         if pred_label == "Red":
             narrative = (
-                f"HIGH ASTHMA RISK DETECTED{patient_context}. The primary environmental driver is elevated {top_driver['name']} "
-                f"({top_driver['value']}{top_driver['unit']}), contributing {top_driver['contribution_pct']}% to the risk score."
+                f"HIGH RISK DETECTED ({engine_tag}){patient_context}. "
+                f"The primary environmental driver is elevated {top_driver['name']} "
+                f"({top_driver['value']}{top_driver['unit']}), accounting for {top_driver['contribution_pct']}% of the model's risk attribution."
             )
             if second_driver and second_driver['shap_value'] > 0:
-                narrative += f" Secondary trigger: {second_driver['name']} ({second_driver['value']}{second_driver['unit']})."
-            rec = "Leave the area immediately or stay indoors with filtered air. Keep fast-acting rescue inhaler accessible."
+                narrative += f" Secondary factor: {second_driver['name']} ({second_driver['value']}{second_driver['unit']})."
+            rec = " ".join(advice_list) or "Elevated environmental hazard. Seek filtered indoor air and observe safety directives."
         elif pred_label == "Yellow":
             narrative = (
-                f"MODERATE ASTHMA RISK{patient_context}. Environmental triggers are rising. "
-                f"{top_driver['name']} ({top_driver['value']}{top_driver['unit']}) represents the most significant risk factor."
+                f"MODERATE RISK LEVEL ({engine_tag}){patient_context}. "
+                f"Environmental risk indicators are moderately elevated. {top_driver['name']} ({top_driver['value']}{top_driver['unit']}) "
+                f"is the most influential feature influencing the model's assessment."
             )
-            rec = "Wear a protective mask outdoors, reduce intense physical exertion, and ensure preventive inhaler is available."
+            rec = " ".join(advice_list) or "Environmental indicators are elevated. Observe standard air quality precautions and limit strenuous outdoor exercise."
         else: # Green
             narrative = (
-                f"SAFE CONDITIONS{patient_context}. Particulate levels and climatic metrics are within safe pulmonary thresholds."
+                f"LOW RISK BASELINE ({engine_tag}){patient_context}. "
+                f"Particulate concentrations and climatic metrics are within optimal safety ranges."
             )
-            rec = "Normal daily activities permitted. Environmental conditions present minimal asthma exacerbation risk."
+            rec = "Normal daily activities permitted. Environmental conditions are favorable and well within baseline comfort margins."
 
         return narrative, rec
 

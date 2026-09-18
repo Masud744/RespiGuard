@@ -1,0 +1,114 @@
+{
+  "dataset_name": "RespiGuard Leakage-Aware Preprocessed Dataset",
+  "version": "1.0.0",
+  "source_file": "/home/shahriar-alom-masud/Projects/Embeded/Embedded Systems Project/datasets/generated/asthma_risk_extended.csv",
+  "total_samples": 1357,
+  "selected_features": [
+    "temperature",
+    "humidity",
+    "pm2_5",
+    "pm10"
+  ],
+  "scaler_means": {
+    "temperature": 12.555933940774489,
+    "humidity": 84.61731207289294,
+    "pm2_5": 4.989510250569476,
+    "pm10": 6.634681093394078
+  },
+  "scaler_scales": {
+    "temperature": 5.412853384189722,
+    "humidity": 10.288958235300528,
+    "pm2_5": 6.571850085133309,
+    "pm10": 7.1830900404546
+  },
+  "splits": {
+    "train": {
+      "rows": 878,
+      "pct": 64.7,
+      "patients": [
+        190,
+        217,
+        294,
+        473,
+        514,
+        625,
+        702,
+        764,
+        808
+      ],
+      "n_patients": 9,
+      "classes": {
+        "Green": 588,
+        "Yellow": 201,
+        "Red": 89
+      }
+    },
+    "val": {
+      "rows": 260,
+      "pct": 19.16,
+      "patients": [
+        328,
+        447,
+        939
+      ],
+      "n_patients": 3,
+      "classes": {
+        "Green": 106,
+        "Yellow": 154,
+        "Red": 0
+      }
+    },
+    "test": {
+      "rows": 219,
+      "pct": 16.14,
+      "patients": [
+        113,
+        343,
+        701,
+        867
+      ],
+      "n_patients": 4,
+      "classes": {
+        "Green": 108,
+        "Yellow": 107,
+        "Red": 4
+      }
+    }
+  },
+  "target_definition": {
+    "name": "risk_label",
+    "mapping": {
+      "Green": 0,
+      "Yellow": 1,
+      "Red": 2
+    },
+    "formula": "PEFR_actual / PEFR_personal_best",
+    "thresholds": {
+      "Green": "pef_ratio >= 0.80 (PEFR >= 80% personal best)",
+      "Yellow": "0.50 <= pef_ratio < 0.80 (PEFR 50-79% personal best)",
+      "Red": "pef_ratio < 0.50 (PEFR < 50% personal best)"
+    },
+    "major_limitations": [
+      "The label is a physiological spirometry ratio, NOT an independent environmental hazard or clinical exacerbation.",
+      "Low PEFR can be caused by user inhalation technique, physical fatigue, psychological stress, or circadian variation.",
+      "Extreme class imbalance and patient concentration: 89 of 93 (95.7%) of all Red labels belong to Patient 190.",
+      "Environmental data in AAMOS-00 was gathered from regional outdoor monitoring stations, not personal wearable dosimeters."
+    ]
+  },
+  "excluded_features": {
+    "pef_ratio": "Direct mathematical derivation of the target label (100% deterministic target leakage).",
+    "pef_max": "Actual measured peak expiratory flow; numerator of target formula (severe target leakage).",
+    "effective_pef_best": "Patient personal best peak flow; denominator of target formula (severe target leakage).",
+    "user_key": "Categorical patient ID; memorizing user keys creates shortcut learning and zero generalization.",
+    "severity": "Static baseline clinical category; not measured by environmental device, confounding risk.",
+    "age_range": "Demographic category; static per patient, confounding risk.",
+    "sex": "Demographic category; static per patient, confounding risk.",
+    "pm1_0": "Synthetically generated channel in build_dataset.py using Gaussian noise; invalid ground truth.",
+    "pressure": "Regional barometric pressure from external weather stations; not measured by onboard hardware.",
+    "wind_speed": "Regional wind speed from external weather stations; not measured by onboard hardware.",
+    "aqi": "External regional weather station AQI index; not measured by onboard hardware.",
+    "date": "Study calendar day; causes spurious temporal correlations across seasonal transitions.",
+    "hour": "Time-of-day indicator; prone to circadian overfitting in small cohort.",
+    "morning": "Binary morning/evening indicator; prone to circadian overfitting."
+  }
+}

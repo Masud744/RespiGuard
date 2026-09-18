@@ -29,7 +29,7 @@ export default function ShapFeatureImportance({ globalImportance, predictionData
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-slate-200">
-            {viewMode === 'shap' ? 'XAI Feature Impact' : 'Weight Tracking Trends'}
+            {viewMode === 'shap' ? 'Feature Drivers (SHAP)' : 'Weekly Risk Trends'}
           </h3>
         </div>
         <button
@@ -37,7 +37,7 @@ export default function ShapFeatureImportance({ globalImportance, predictionData
           className="flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition"
         >
           <Sparkles className="w-2.5 h-2.5" />
-          <span>{viewMode === 'shap' ? 'Show Trends' : 'XAI Mode'}</span>
+          <span>{viewMode === 'shap' ? 'Weekly Trends' : 'Feature Drivers'}</span>
         </button>
       </div>
 

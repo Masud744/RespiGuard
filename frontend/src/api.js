@@ -1,5 +1,76 @@
 const API_BASE = 'http://127.0.0.1:8000/api';
 
+/**
+ * Normalizes backend error responses (string, array of validation objects, error objects)
+ * into readable user-facing text, preventing '[object Object]' from leaking into the UI.
+ *
+ * @param {any} data - Parsed JSON error response from backend
+ * @param {string} fallback - Default fallback error message
+ * @returns {string} Clean, readable error message
+ */
+export function formatApiError(data, fallback = 'An unexpected error occurred') {
+  if (!data) return fallback;
+
+  // 1. Direct string detail or error
+  const raw = data.detail !== undefined ? data.detail : (data.error !== undefined ? data.error : data.message);
+
+  if (typeof raw === 'string' && raw.trim()) {
+    const trimmed = raw.trim();
+    // If the error string embeds a JSON object e.g. "Database error: {...}"
+    if (trimmed.includes('{') && trimmed.includes('}')) {
+      try {
+        const jsonStart = trimmed.indexOf('{');
+        const jsonEnd = trimmed.lastIndexOf('}');
+        const jsonSubstring = trimmed.substring(jsonStart, jsonEnd + 1);
+        const parsed = JSON.parse(jsonSubstring);
+        if (parsed && typeof parsed === 'object') {
+          const innerMsg = parsed.message || parsed.msg || parsed.hint || parsed.details;
+          if (innerMsg) {
+            const prefix = trimmed.substring(0, jsonStart).trim();
+            return prefix ? `${prefix} ${innerMsg}` : innerMsg;
+          }
+        }
+      } catch {
+        // Fall back to original trimmed string
+      }
+    }
+    return trimmed;
+  }
+
+  // 2. Array of Pydantic validation error objects: [{loc: ['body', 'field'], msg: '...', type: '...'}]
+  if (Array.isArray(raw) && raw.length > 0) {
+    const formatted = raw.map((item) => {
+      if (typeof item === 'string') return item;
+      if (item && typeof item === 'object') {
+        const field = Array.isArray(item.loc) && item.loc.length > 0
+          ? item.loc[item.loc.length - 1]
+          : '';
+        const msg = item.msg || item.message || JSON.stringify(item);
+        return field && field !== '__root__' ? `${field}: ${msg}` : msg;
+      }
+      return String(item);
+    }).filter(Boolean);
+
+    if (formatted.length > 0) {
+      return formatted.join('; ');
+    }
+  }
+
+  // 3. Object detail: { msg: '...', error: '...' }
+  if (raw && typeof raw === 'object') {
+    if (typeof raw.msg === 'string') return raw.msg;
+    if (typeof raw.message === 'string') return raw.message;
+    if (typeof raw.error === 'string') return raw.error;
+    try {
+      return JSON.stringify(raw);
+    } catch {
+      return fallback;
+    }
+  }
+
+  return fallback;
+}
+
 export async function fetchHealth() {
   try {
     const res = await fetch(`${API_BASE}/health`);
@@ -154,7 +225,7 @@ export async function sendEmailOTP(email, fullName = 'Patient User') {
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Failed to send verification code');
+    throw new Error(formatApiError(data, 'Failed to send verification code'));
   }
   return data;
 }
@@ -167,13 +238,46 @@ export async function verifyEmailOTP(email, otp) {
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Invalid verification code');
+    throw new Error(formatApiError(data, 'Invalid verification code'));
   }
   return data;
 }
 
 export const sendOtp = sendEmailOTP;
 export const verifyOtp = verifyEmailOTP;
+
+/**
+ * Retrieves valid authentication JWT token from localStorage.
+ * If missing but user is logged in, auto-recovers token via backend session endpoint.
+ */
+export async function getAuthToken() {
+  let token = localStorage.getItem('respiguard_token');
+  if (token) return token;
+
+  try {
+    const savedUser = localStorage.getItem('respiguard_user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      if (user && user.id) {
+        const res = await fetch(`${API_BASE}/auth/token-for-user`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.access_token) {
+            localStorage.setItem('respiguard_token', data.access_token);
+            return data.access_token;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Auto-token recovery failed:', err);
+  }
+  return null;
+}
 
 export async function signupUser(userData) {
   const res = await fetch(`${API_BASE}/auth/signup`, {
@@ -183,7 +287,10 @@ export async function signupUser(userData) {
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Signup failed');
+    throw new Error(formatApiError(data, 'Signup failed'));
+  }
+  if (data.access_token) {
+    localStorage.setItem('respiguard_token', data.access_token);
   }
   return data;
 }
@@ -196,9 +303,59 @@ export async function loginUser(credentials) {
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Invalid email or password');
+    throw new Error(formatApiError(data, 'Invalid email or password'));
+  }
+  if (data.access_token) {
+    localStorage.setItem('respiguard_token', data.access_token);
   }
   return data;
+}
+
+// ==============================================================================
+// Authenticated Fetch Helper with Silent 401 Token Recovery
+// ==============================================================================
+
+/**
+ * Executes network fetch with Authorization Bearer token.
+ * If server returns 401 Unauthorized (e.g. signature verification failed or token expired),
+ * automatically recovers a fresh access token for the active user session and transparently retries.
+ */
+export async function fetchWithAuth(url, options = {}) {
+  let token = await getAuthToken();
+  const headers = { ...(options.headers || {}) };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  let res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    try {
+      const savedUser = localStorage.getItem('respiguard_user');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        if (user && user.id) {
+          const tokenRes = await fetch(`${API_BASE}/auth/token-for-user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: user.id })
+          });
+          if (tokenRes.ok) {
+            const data = await tokenRes.json();
+            if (data.access_token) {
+              localStorage.setItem('respiguard_token', data.access_token);
+              headers['Authorization'] = `Bearer ${data.access_token}`;
+              res = await fetch(url, { ...options, headers });
+            }
+          }
+        }
+      }
+    } catch (refreshErr) {
+      console.warn('Transparent token auto-refresh failed:', refreshErr);
+    }
+  }
+
+  return res;
 }
 
 // ==============================================================================
@@ -207,7 +364,7 @@ export async function loginUser(credentials) {
 
 export async function fetchDoctors(userId) {
   try {
-    const res = await fetch(`${API_BASE}/doctors?user_id=${userId}`);
+    const res = await fetchWithAuth(`${API_BASE}/doctors?user_id=${userId}`);
     if (!res.ok) throw new Error('Failed to fetch doctors');
     const data = await res.json();
     return data.doctors || [];
@@ -218,51 +375,51 @@ export async function fetchDoctors(userId) {
 }
 
 export async function addDoctor(doctorData) {
-  const res = await fetch(`${API_BASE}/doctors`, {
+  const res = await fetchWithAuth(`${API_BASE}/doctors`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(doctorData)
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Failed to add doctor');
+    throw new Error(formatApiError(data, 'Failed to add doctor'));
   }
   return data;
 }
 
 export async function deleteDoctor(doctorId, userId) {
-  const res = await fetch(`${API_BASE}/doctors/${doctorId}?user_id=${userId}`, {
+  const res = await fetchWithAuth(`${API_BASE}/doctors/${doctorId}?user_id=${userId}`, {
     method: 'DELETE'
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Failed to remove doctor');
+    throw new Error(formatApiError(data, 'Failed to remove doctor'));
   }
   return data;
 }
 
 export async function sendMessageToDoctor(messageData) {
-  const res = await fetch(`${API_BASE}/messages/send`, {
+  const res = await fetchWithAuth(`${API_BASE}/messages/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(messageData)
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Failed to send message to doctor');
+    throw new Error(formatApiError(data, 'Failed to send message to doctor'));
   }
   return data;
 }
 
 export async function simulateDoctorReply(replyData) {
-  const res = await fetch(`${API_BASE}/messages/reply`, {
+  const res = await fetchWithAuth(`${API_BASE}/messages/reply`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(replyData)
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || data.error || 'Failed to record doctor reply');
+    throw new Error(formatApiError(data, 'Failed to record doctor reply'));
   }
   return data;
 }
@@ -272,7 +429,7 @@ export async function fetchMessages(userId, doctorId = null) {
     const url = doctorId
       ? `${API_BASE}/messages?user_id=${userId}&doctor_id=${doctorId}`
       : `${API_BASE}/messages?user_id=${userId}`;
-    const res = await fetch(url);
+    const res = await fetchWithAuth(url);
     if (!res.ok) throw new Error('Failed to fetch messages');
     const data = await res.json();
     return data.messages || [];
@@ -282,9 +439,11 @@ export async function fetchMessages(userId, doctorId = null) {
   }
 }
 
+export const getMessages = fetchMessages;
+
 export async function markMessageRead(messageId, userId) {
   try {
-    const res = await fetch(`${API_BASE}/messages/${messageId}/read?user_id=${userId}`, {
+    const res = await fetchWithAuth(`${API_BASE}/messages/${messageId}/read?user_id=${userId}`, {
       method: 'PATCH'
     });
     return res.ok;
@@ -368,3 +527,265 @@ export async function fetchAlerts() {
     ];
   }
 }
+
+/**
+ * Updates patient clinical baseline parameters (Age, Severity, Sex, PEF, Name)
+ */
+export async function updateProfile(data) {
+  const res = await fetchWithAuth(`${API_BASE}/auth/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to update profile'));
+  }
+  return resData;
+}
+
+/**
+ * Fetches verified pulmonology specialists directory
+ */
+export async function fetchDoctorsDirectory() {
+  try {
+    const res = await fetch(`${API_BASE}/doctors/directory`);
+    if (!res.ok) throw new Error('Failed to fetch doctors directory');
+    const data = await res.json();
+    return data.directory || [];
+  } catch (err) {
+    console.warn('Error fetching doctors directory, returning fallback:', err);
+    return [];
+  }
+}
+
+/**
+ * Connects patient with a verified doctor
+ */
+export async function connectDoctor(doctorData) {
+  const res = await fetchWithAuth(`${API_BASE}/doctors/connect`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(doctorData)
+  });
+
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to connect doctor'));
+  }
+  return resData;
+}
+
+/**
+ * Fetches patients linked to doctor for doctor portal
+ */
+export async function fetchDoctorPatients(doctorId = null) {
+  try {
+    const url = doctorId ? `${API_BASE}/doctor/patients?doctor_id=${doctorId}` : `${API_BASE}/doctor/patients`;
+    const res = await fetchWithAuth(url);
+    if (!res.ok) throw new Error('Failed to fetch doctor patients');
+    const data = await res.json();
+    return data.patients || [];
+  } catch (err) {
+    console.warn('Error fetching doctor patients:', err);
+    return [];
+  }
+}
+
+/**
+ * Pairs a patient with the doctor by patient ID code (e.g. PAT-2201031)
+ */
+export async function pairPatientWithDoctor(patientIdCode, doctorId = null) {
+  const body = { patient_id_code: patientIdCode };
+  if (doctorId) body.doctor_id = doctorId;
+
+  const res = await fetchWithAuth(`${API_BASE}/doctor/pair-patient`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to pair patient'));
+  }
+  return resData;
+}
+
+/**
+ * Persists satellite atmospheric pollutant breakdown & outdoor weather into database
+ */
+export async function saveSatelliteEnvironmentData(payload) {
+  try {
+    const res = await fetch(`${API_BASE}/environment/satellite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Failed to persist satellite data');
+    return await res.json();
+  } catch (err) {
+    console.warn('Notice: Could not persist satellite reading to DB:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetches latest satellite atmospheric pollutant breakdown from database
+ */
+export async function fetchLatestSatelliteEnvironment() {
+  try {
+    const res = await fetch(`${API_BASE}/environment/latest`);
+    if (!res.ok) throw new Error('Failed to fetch latest satellite data');
+    const data = await res.json();
+    return data.data;
+  } catch (err) {
+    console.warn('Notice: Could not fetch satellite reading from DB:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetches patient medications from database
+ */
+export async function fetchMedications(userId = null) {
+  try {
+    const url = userId ? `${API_BASE}/medications?user_id=${encodeURIComponent(userId)}` : `${API_BASE}/medications`;
+    const res = await fetchWithAuth(url);
+    if (!res.ok) throw new Error('Failed to fetch medications');
+    const data = await res.json();
+    return data.medications || [];
+  } catch (err) {
+    console.warn('Error fetching medications from DB:', err);
+    return null;
+  }
+}
+
+/**
+ * Saves or updates a patient medication in the database
+ */
+export async function saveMedication(userId, medData) {
+  const body = { ...medData, user_id: userId };
+  const res = await fetchWithAuth(`${API_BASE}/medications`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to save medication'));
+  }
+  return resData.medications;
+}
+
+/**
+ * Logs a medication dose (morning, evening, or PRN rescue puff) in database
+ */
+export async function logMedicationDose(userId, payload) {
+  const body = { ...payload, user_id: userId };
+  const res = await fetchWithAuth(`${API_BASE}/medications/log-dose`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to log medication dose'));
+  }
+  return resData.medications;
+}
+
+/**
+ * Deletes a medication from the database
+ */
+export async function deleteMedication(userId, medId) {
+  const url = userId 
+    ? `${API_BASE}/medications/${encodeURIComponent(medId)}?user_id=${encodeURIComponent(userId)}` 
+    : `${API_BASE}/medications/${encodeURIComponent(medId)}`;
+  const res = await fetchWithAuth(url, {
+    method: 'DELETE'
+  });
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to delete medication'));
+  }
+  return resData.medications;
+}
+
+/**
+ * Resets user medications to standard clinical defaults in database
+ */
+export async function resetMedicationsToDefaults(userId) {
+  const url = userId 
+    ? `${API_BASE}/medications/reset-defaults?user_id=${encodeURIComponent(userId)}` 
+    : `${API_BASE}/medications/reset-defaults`;
+  const res = await fetchWithAuth(url, {
+    method: 'POST'
+  });
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to reset medications'));
+  }
+  return resData.medications;
+}
+
+/**
+ * Fetches AI Copilot engine status (Groq Cloud active or local engine)
+ */
+export async function fetchCopilotStatus() {
+  try {
+    const res = await fetchWithAuth(`${API_BASE}/copilot/status`);
+    if (!res.ok) throw new Error('Failed to fetch copilot status');
+    return await res.json();
+  } catch (err) {
+    return { groq_active: false, model: 'llama-3.3-70b-versatile', mode: 'local_fallback' };
+  }
+}
+
+/**
+ * Sends conversation message to RespiGuard AI Copilot with Tool Calling
+ */
+export async function sendCopilotMessage(message, history = []) {
+  const res = await fetchWithAuth(`${API_BASE}/copilot/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history })
+  });
+  const resData = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(formatApiError(resData, 'Failed to communicate with AI Copilot'));
+  }
+  return resData;
+}
+
+/**
+ * Fetches verified, decrypted AI Copilot conversation history from encrypted database
+ */
+export async function fetchCopilotHistory() {
+  try {
+    const res = await fetchWithAuth(`${API_BASE}/copilot/history`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.messages || [];
+  } catch (err) {
+    console.warn("Failed to fetch cloud copilot history:", err);
+    return null;
+  }
+}
+
+/**
+ * Clears AI Copilot conversation history from encrypted database
+ */
+export async function clearCopilotHistory() {
+  try {
+    const res = await fetchWithAuth(`${API_BASE}/copilot/history`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn("Failed to clear cloud copilot history:", err);
+    return false;
+  }
+}
+

@@ -83,11 +83,11 @@ export default function TelemetrySimulator({ telemetry, setTelemetry, onRunInfer
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-emerald-400" />
             <h3 className="text-lg font-bold text-white tracking-tight">
-              Interactive ESP32 Telemetry & XAI Simulator
+              Telemetry & Risk Simulator
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Adjust environmental parameters to simulate real-time ML risk predictions and SHAP feature impacts.
+            Adjust environmental parameters to simulate real-time asthma risk and feature impact
           </p>
         </div>
 
@@ -213,41 +213,76 @@ export default function TelemetrySimulator({ telemetry, setTelemetry, onRunInfer
           {/* 2. Streamlined Two-Column Grid: Clinical Insights + Key Feature Drivers */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             
-            {/* Column 1: AI Clinical Assessment & Doctor Advice (6 Cols) */}
-            <div className="lg:col-span-6 p-4 rounded-2xl bg-forest-950/70 border border-emerald-500/15 flex flex-col justify-between">
+            {/* Column 1: AI Clinical Assessment & Structured Action Recommendations (6 Cols) */}
+            <div className="lg:col-span-6 p-4 rounded-2xl bg-forest-950/70 border border-emerald-500/15 flex flex-col justify-between space-y-3">
               <div>
-                <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs mb-2">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
-                  <span>Clinical Assessment</span>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span>Clinical Assessment</span>
+                  </div>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    AI Assessment
+                  </span>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {predictionData.explanation}
                 </p>
               </div>
 
-              <div className="mt-3.5 pt-3 border-t border-emerald-500/10 flex items-start gap-2 bg-emerald-950/30 p-2.5 rounded-xl border border-emerald-500/20">
-                <Stethoscope className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-emerald-200 leading-snug font-medium">
-                  <strong className="text-emerald-300">Action Plan: </strong>
-                  {predictionData.recommendation}
-                </p>
+              {/* Actionable Clinical Recommendations */}
+              <div className="space-y-2 pt-2 border-t border-emerald-500/15">
+                <span className="text-[11px] font-bold text-emerald-300 flex items-center gap-1.5">
+                  <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
+                  Recommended Action:
+                </span>
+                {predictionData.clinical_recommendations && predictionData.clinical_recommendations.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {predictionData.clinical_recommendations.map((rec, rIdx) => (
+                      <div key={rIdx} className="flex items-start gap-2 bg-emerald-950/40 p-2 rounded-xl border border-emerald-500/20 text-xs text-emerald-200">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                        <span className="leading-tight">{rec}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/20 text-xs text-emerald-200 font-medium">
+                    <Stethoscope className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>{predictionData.recommendation}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Column 2: Key Environmental Drivers (6 Cols) */}
             <div className="lg:col-span-6 p-4 rounded-2xl bg-forest-950/70 border border-emerald-500/15">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-bold text-slate-200">Key Environmental Drivers (SHAP Impact)</span>
-                <span className="text-[10px] text-slate-400">Contribution to Risk</span>
+                <div>
+                  <span className="text-xs font-bold text-slate-200 block">
+                    Key Environmental Drivers
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-medium">
+                    Feature Impact Ranking
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400">Risk Influence</span>
               </div>
 
               <div className="space-y-2">
-                {impacts.slice(0, 3).map((feat) => {
+                {impacts.map((feat) => {
                   const isRiskIncreasing = feat.shap_value > 0;
+                  const cleanFeatName =
+                    feat.feature === 'pm2_5' || feat.name?.includes('2.5') ? 'PM2.5' :
+                    feat.feature === 'pm10' || feat.name?.includes('10') ? 'PM10' :
+                    feat.feature === 'pm1_0' || feat.name?.includes('1.0') ? 'PM1.0' :
+                    feat.feature === 'temperature' || feat.name?.toLowerCase().includes('temperature') ? 'Temperature' :
+                    feat.feature === 'humidity' || feat.name?.toLowerCase().includes('humidity') ? 'Humidity' :
+                    feat.name?.split(' ')[0] || feat.feature;
+
                   return (
                     <div key={feat.feature} className="flex items-center justify-between p-2 rounded-xl bg-forest-900/60 border border-emerald-500/10 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">{feat.name.split(' ')[0]}</span>
+                        <span className="font-semibold text-white">{cleanFeatName}</span>
                         <span className="text-[10px] text-slate-400 font-mono">({feat.value} {feat.unit})</span>
                       </div>
 
@@ -260,7 +295,7 @@ export default function TelemetrySimulator({ telemetry, setTelemetry, onRunInfer
                           {isRiskIncreasing ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                           {isRiskIncreasing ? 'Raises Risk' : 'Protective'}
                         </span>
-                        <span className="font-mono text-[11px] font-bold text-slate-200 w-10 text-right">
+                        <span className="font-mono text-[11px] font-bold text-slate-200 w-12 text-right">
                           {feat.contribution_pct}%
                         </span>
                       </div>

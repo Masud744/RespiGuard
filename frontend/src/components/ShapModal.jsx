@@ -24,8 +24,8 @@ export default function ShapModal({ isOpen, onClose, predictionData, globalImpor
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">XAI / TreeSHAP Model Attribution</h3>
-            <p className="text-xs text-slate-400">Exact Shapley values explaining individual sensor contributions</p>
+            <h3 className="text-lg font-bold text-white">Feature Risk Attribution (TreeSHAP)</h3>
+            <p className="text-xs text-slate-400">Exact positive or negative influence of each environmental parameter on asthma risk</p>
           </div>
         </div>
 
@@ -47,7 +47,7 @@ export default function ShapModal({ isOpen, onClose, predictionData, globalImpor
             </div>
           </div>
           <div className="text-right">
-            <span className="text-xs text-slate-400">Expected Base Value $E[f(x)]$:</span>
+            <span className="text-xs text-slate-400">Baseline Expected Value:</span>
             <div className="text-sm font-bold text-slate-200">{baseValue}</div>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function ShapModal({ isOpen, onClose, predictionData, globalImpor
                       )}
                     </div>
                     <span className="font-mono text-slate-300">
-                      SHAP: <strong className={isPositive ? 'text-rose-400' : 'text-emerald-400'}>
+                      Indicator: <strong className={isPositive ? 'text-rose-400' : 'text-emerald-400'}>
                         {isPositive ? `+${feat.shap_value.toFixed(4)}` : feat.shap_value.toFixed(4)}
                       </strong> ({feat.contribution_pct}%)
                     </span>
@@ -107,13 +107,13 @@ export default function ShapModal({ isOpen, onClose, predictionData, globalImpor
         {globalImportance && globalImportance.length > 0 && (
           <div className="mb-6 p-4 rounded-xl bg-forest-950/70 border border-forest-800">
             <h4 className="text-xs font-semibold text-slate-300 mb-2">
-              Global Model Feature Importance (Across Entire Cohort):
+              Global Feature Importance:
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
               {globalImportance.map((g) => (
                 <div key={g.feature} className="p-2 rounded-lg bg-forest-900 border border-forest-800 text-[11px]">
                   <p className="text-slate-400 truncate">{g.name}</p>
-                  <p className="font-bold text-emerald-400 mt-0.5">{g.importance_percentage}% (SHAP {g.mean_shap})</p>
+                  <p className="font-bold text-emerald-400 mt-0.5">{g.importance_percentage}% (Weight {g.mean_shap})</p>
                 </div>
               ))}
             </div>

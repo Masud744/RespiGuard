@@ -26,3 +26,10 @@ env/
 .DS_Store
 Thumbs.db
 *.log
+.pytest_cache/
+
+# Local database & cryptographic keys
+*.db
+backend/respiguard.db
+backend/.jwt_signing_key
+scratch/

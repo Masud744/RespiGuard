@@ -4,19 +4,27 @@ import {
   Pill, 
   MessageSquare, 
   Sparkles, 
-  Activity 
+  Activity,
+  MapPin,
+  X
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar({ activeTab, setActiveTab, isMobileOpen, onCloseMobile, isEsp32Connected = false }) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
-    { id: 'xai', label: 'XAI & SHAP Analytics', icon: Sparkles },
+    { id: 'map', label: 'Air Quality Map', icon: MapPin },
+    { id: 'xai', label: 'Clinical Risk AI', icon: Sparkles },
     { id: 'medications', label: 'Medications', icon: Pill },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 4 },
+    { id: 'messages', label: 'Consultations', icon: MessageSquare, badge: 4 },
   ];
 
-  return (
-    <aside className="w-64 bg-forest-900/95 border-r border-forest-800/80 p-5 flex flex-col justify-between min-h-screen shrink-0 backdrop-blur-xl">
+  const handleItemClick = (id) => {
+    setActiveTab(id);
+    if (onCloseMobile) onCloseMobile();
+  };
+
+  const sidebarContent = (
+    <div className="flex flex-col justify-between h-full">
       <div>
         {/* Brand / Logo */}
         <div className="flex items-center justify-between mb-8 px-2">
@@ -25,17 +33,24 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               <Activity className="w-5 h-5 text-forest-950 stroke-[2.5]" />
             </div>
             <span className="font-bold text-lg tracking-tight text-white flex items-center gap-1">
-              AuraHealth<span className="text-emerald-400">.io</span>
+              RespiGuard<span className="text-emerald-400">.ai</span>
             </span>
           </div>
-          <div className="w-5 h-5 rounded border border-forest-700/60 flex items-center justify-center text-slate-400 cursor-pointer hover:text-white transition">
-            <div className="w-2.5 h-2.5 border-t-2 border-r-2 border-current"></div>
-          </div>
+
+          {/* Close button for mobile drawer */}
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white bg-forest-800/80 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Menu Section */}
         <div className="mb-6">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Menu</p>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">Clinical Portal</p>
           <nav className="space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -43,8 +58,8 @@ export default function Sidebar({ activeTab, setActiveTab }) {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  onClick={() => handleItemClick(item.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
                     isActive
                       ? 'bg-emerald-500 text-forest-950 font-semibold shadow-lg shadow-emerald-500/25 glow-pill'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-forest-800/50'
@@ -67,6 +82,48 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </nav>
         </div>
       </div>
-    </aside>
+
+      {/* Footer System Status */}
+      <div className={`p-3 rounded-2xl bg-forest-950/80 border text-xs transition-colors ${
+        isEsp32Connected ? 'border-emerald-500/20' : 'border-rose-500/20'
+      }`}>
+        <div className={`flex items-center gap-2 font-mono font-bold mb-0.5 ${
+          isEsp32Connected ? 'text-emerald-400' : 'text-rose-400'
+        }`}>
+          <span className={`w-2 h-2 rounded-full ${
+            isEsp32Connected ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
+          }`} />
+          <span>esp32_node1</span>
+        </div>
+        <p className="text-[11px] text-slate-400">
+          {isEsp32Connected ? 'Live Telemetry & ML Active' : 'Node Disconnected / Standby'}
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 bg-forest-900/95 border-r border-forest-800/80 p-5 flex-col justify-between min-h-screen shrink-0 backdrop-blur-xl">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Drawer & Overlay */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden animate-fadeIn">
+          {/* Backdrop */}
+          <div 
+            onClick={onCloseMobile} 
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+          />
+
+          {/* Drawer Panel */}
+          <div className="relative w-64 max-w-[80vw] h-full bg-forest-900/98 border-r border-emerald-500/25 p-5 shadow-2xl z-10 flex flex-col justify-between">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

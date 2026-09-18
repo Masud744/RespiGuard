@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { 
   X, Mail, Lock, User, Activity, AlertCircle, 
-  CheckCircle2, ArrowRight, ShieldCheck, HeartPulse, ChevronLeft
+  CheckCircle2, ArrowRight, ShieldCheck, HeartPulse, ChevronLeft,
+  Eye, EyeOff, Check, KeyRound
 } from 'lucide-react';
 import { signupUser, loginUser } from '../api';
 
@@ -22,6 +23,32 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     sex: 'male',
     pef_best: 520
   });
+
+  // Password Confirmation & Visibility State
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  // Dynamic Password Validation Criteria (Enforced by backend validation)
+  const pwdCriteria = {
+    hasMinLength: (formData.password || '').length >= 8,
+    hasUppercase: /[A-Z]/.test(formData.password || ''),
+    hasNumber: /[0-9]/.test(formData.password || '')
+  };
+
+  const criteriaPassedCount = Object.values(pwdCriteria).filter(Boolean).length;
+  const isPasswordValid = criteriaPassedCount === 3;
+  const isConfirmMatching = confirmPassword.length > 0 && confirmPassword === formData.password;
+  const hasConfirmMismatch = confirmPassword.length > 0 && confirmPassword !== formData.password;
+
+  const getStrengthLabel = () => {
+    if (!formData.password) return { label: '', color: 'bg-slate-700', text: 'text-slate-500', width: 'w-0' };
+    if (criteriaPassedCount === 1) return { label: 'Weak', color: 'bg-rose-500', text: 'text-rose-400', width: 'w-1/3' };
+    if (criteriaPassedCount === 2) return { label: 'Moderate', color: 'bg-amber-500', text: 'text-amber-400', width: 'w-2/3' };
+    return { label: 'Strong', color: 'bg-emerald-500', text: 'text-emerald-400', width: 'w-full' };
+  };
 
   if (!isOpen) return null;
 
@@ -55,9 +82,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
       });
 
       if (res.success && res.user) {
+        const userObj = { ...res.user, access_token: res.access_token };
+        if (res.access_token) {
+          localStorage.setItem('respiguard_token', res.access_token);
+        }
         setSuccessMsg(`Welcome back, ${res.user.full_name}!`);
         setTimeout(() => {
-          onAuthSuccess(res.user);
+          onAuthSuccess(userObj);
           onClose();
         }, 600);
       }
@@ -70,12 +101,32 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
   const handleNextStep = (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password || !formData.full_name) {
-      setErrorMsg('Please fill in all fields.');
+    if (!formData.full_name.trim()) {
+      setErrorMsg('Please enter your full name.');
       return;
     }
-    if (formData.password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters.');
+    if (!formData.email.trim() || !formData.email.includes('@')) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+    if (!pwdCriteria.hasMinLength) {
+      setErrorMsg('Password must be at least 8 characters long.');
+      return;
+    }
+    if (!pwdCriteria.hasUppercase) {
+      setErrorMsg('Password must contain at least one uppercase letter (A-Z).');
+      return;
+    }
+    if (!pwdCriteria.hasNumber) {
+      setErrorMsg('Password must contain at least one digit (0-9).');
+      return;
+    }
+    if (!confirmPassword) {
+      setErrorMsg('Please confirm your password.');
+      return;
+    }
+    if (formData.password !== confirmPassword) {
+      setErrorMsg('Passwords do not match. Please ensure both passwords are identical.');
       return;
     }
     setErrorMsg('');
@@ -90,9 +141,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     try {
       const res = await signupUser(formData);
       if (res.success && res.user) {
+        const userObj = { ...res.user, access_token: res.access_token };
+        if (res.access_token) {
+          localStorage.setItem('respiguard_token', res.access_token);
+        }
         setSuccessMsg('Account created & clinical profile saved successfully!');
         setTimeout(() => {
-          onAuthSuccess(res.user);
+          onAuthSuccess(userObj);
           onClose();
         }, 800);
       }
@@ -205,14 +260,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  type="password"
+                  type={showLoginPassword ? 'text' : 'password'}
                   name="password"
                   required
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 bg-forest-950/80 border border-emerald-500/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 bg-forest-950/80 border border-emerald-500/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5"
+                  tabIndex={-1}
+                >
+                  {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
@@ -270,21 +333,133 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               </div>
             </div>
 
+            {/* Create Password Input */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Create Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-slate-300">Create Password</label>
+                {formData.password && (
+                  <span className={`text-[10px] font-bold ${getStrengthLabel().text}`}>
+                    Strength: {getStrengthLabel().label}
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   required
-                  minLength={6}
-                  placeholder="Min 6 characters"
+                  placeholder="At least 8 chars, 1 uppercase, 1 digit"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 bg-forest-950/80 border border-emerald-500/20 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
+                  onFocus={() => setIsPasswordFocused(true)}
+                  className={`w-full pl-10 pr-10 py-2.5 bg-forest-950/80 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
+                    formData.password && !isPasswordValid
+                      ? 'border-amber-500/50 focus:border-amber-400'
+                      : formData.password && isPasswordValid
+                      ? 'border-emerald-500/60 focus:border-emerald-400'
+                      : 'border-emerald-500/20 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400'
+                  }`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
+
+              {/* Password Strength Meter Bar */}
+              {formData.password && (
+                <div className="mt-2 w-full bg-forest-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                  <div
+                    className={`h-full transition-all duration-300 ${getStrengthLabel().color} ${getStrengthLabel().width}`}
+                  />
+                </div>
+              )}
+
+              {/* Real-time Dynamic Password Criteria Checklist */}
+              {(isPasswordFocused || formData.password) && (
+                <div className="mt-2 p-3 rounded-xl bg-forest-950/90 border border-emerald-500/20 space-y-1.5 animate-fadeIn">
+                  <p className="text-[11px] font-semibold text-slate-300 mb-1">Password Requirements:</p>
+                  <div className="grid grid-cols-1 gap-1 text-[11px]">
+                    <div className={`flex items-center gap-2 transition-colors ${pwdCriteria.hasMinLength ? 'text-emerald-400 font-semibold' : 'text-slate-400'}`}>
+                      {pwdCriteria.hasMinLength ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0 ml-1 mr-1" />
+                      )}
+                      <span>At least 8 characters long ({formData.password.length}/8)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 transition-colors ${pwdCriteria.hasUppercase ? 'text-emerald-400 font-semibold' : 'text-slate-400'}`}>
+                      {pwdCriteria.hasUppercase ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0 ml-1 mr-1" />
+                      )}
+                      <span>At least one uppercase letter (A-Z)</span>
+                    </div>
+                    <div className={`flex items-center gap-2 transition-colors ${pwdCriteria.hasNumber ? 'text-emerald-400 font-semibold' : 'text-slate-400'}`}>
+                      {pwdCriteria.hasNumber ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0 ml-1 mr-1" />
+                      )}
+                      <span>At least one number (0-9)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Confirm Password Input */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Confirm Password</label>
+              <div className="relative">
+                <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  required
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setErrorMsg('');
+                  }}
+                  className={`w-full pl-10 pr-10 py-2.5 bg-forest-950/80 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
+                    isConfirmMatching
+                      ? 'border-emerald-500/60 focus:border-emerald-400'
+                      : hasConfirmMismatch
+                      ? 'border-rose-500/60 focus:border-rose-400'
+                      : 'border-emerald-500/20 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Real-time Match Indicator */}
+              {isConfirmMatching && (
+                <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 mt-1.5 font-medium animate-fadeIn">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Passwords match</span>
+                </div>
+              )}
+              {hasConfirmMismatch && (
+                <div className="flex items-center gap-1.5 text-[11px] text-rose-400 mt-1.5 font-medium animate-fadeIn">
+                  <span className="text-rose-400 font-bold ml-1 mr-1">✕</span>
+                  <span>Passwords do not match</span>
+                </div>
+              )}
             </div>
 
             <button
