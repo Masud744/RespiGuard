@@ -446,7 +446,7 @@ def is_origin_authorized(candidate_uri: str) -> bool:
         origin_tuple = (scheme, hostname, port)
         if origin_tuple in ALLOWED_ORIGIN_TUPLES:
             return True
-        if scheme == "https" and (hostname.endswith(".onrender.com") or hostname.endswith(".trycloudflare.com")):
+        if scheme == "https" and (hostname.endswith(".onrender.com") or hostname.endswith(".trycloudflare.com") or hostname.endswith(".vercel.app")):
             return True
         extra_env = (os.getenv("FRONTEND_URL", "") + "," + os.getenv("CORS_ORIGINS", "")).strip(",")
         for orig in extra_env.split(","):

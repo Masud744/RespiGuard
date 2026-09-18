@@ -154,7 +154,7 @@ if extra_origins:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://.*(\.onrender\.com|\.trycloudflare\.com)",
+    allow_origin_regex=r"https://.*(\.onrender\.com|\.trycloudflare\.com|\.vercel\.app)",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
