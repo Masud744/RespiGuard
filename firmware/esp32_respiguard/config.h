@@ -10,9 +10,9 @@
 #define WIFI_SSID         "Masud"
 #define WIFI_PASSWORD     "password"
 
-// 2. RespiGuard Backend Server Configuration (Cloudflare Public Tunnel)
+// 2. RespiGuard Backend Server Configuration (Production Render Cloud)
 // Allows ESP32 to push telemetry from ANY Wi-Fi / Hotspot globally!
-#define SERVER_HOST       "https://vocational-pipeline-bytes-ensures.trycloudflare.com"
+#define SERVER_HOST       "https://respiguard-backend.onrender.com"
 #define TELEMETRY_PATH    "/api/telemetry"
 #define DEVICE_NODE_ID    "ESP32-RespiGuard-01"
 
