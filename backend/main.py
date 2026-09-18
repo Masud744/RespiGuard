@@ -583,6 +583,7 @@ class ConnectDoctorRequest(BaseModel):
 # ==============================================================================
 
 @app.get("/")
+@app.head("/")
 def read_root():
     return {
         "service": "RespiGuard XAI Asthma Risk Monitoring API",
@@ -593,7 +594,9 @@ def read_root():
     }
 
 @app.get("/health")
+@app.head("/health")
 @app.get("/api/health")
+@app.head("/api/health")
 def get_health():
     features = (
         getattr(xai_service, 'patient_all_cols', None)
