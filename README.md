@@ -1,15 +1,22 @@
-# RespiGuard: Explainable AI and Edge IoT for Real-Time Respiratory Risk Monitoring Under Environmental Metrology: A Cyber-Physical Framework
+<div align="center">
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18.3+-61DAFB.svg?logo=react&logoColor=black)](https://reactjs.org)
-[![Vite](https://img.shields.io/badge/Vite-5.2+-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E.svg?logo=supabase&logoColor=white)](https://supabase.com)
-[![ESP32](https://img.shields.io/badge/ESP32-FreeRTOS-E7352C.svg?logo=espressif&logoColor=white)](https://www.espressif.com)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org)
-[![Render](https://img.shields.io/badge/Render-Deployed-46E3B7.svg?logo=render&logoColor=black)](https://respiguard-backend.onrender.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# 🫁 RespiGuard.ai
+### Explainable AI and Edge IoT for Real-Time Respiratory Risk Monitoring Under Environmental Metrology: A Cyber-Physical Framework
 
-> **An end-to-end Cyber-Physical Healthcare System combining physical hardware sensing (Plantower PMS5003 laser particulate counter, DHT22, Winsen MQ-135), leak-free hierarchical machine learning forecasting, dynamic TreeSHAP explainability, Open-Meteo atmospheric intelligence, and AES-256 encrypted telemedicine for precision asthma risk management.**
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg?style=for-the-badge&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.2-646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![ESP32](https://img.shields.io/badge/ESP32-Espressif-E7352C.svg?style=for-the-badge&logo=espressif&logoColor=white)](https://www.espressif.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E.svg?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Groq Llama 3.3](https://img.shields.io/badge/Groq-Llama--3.3--70B-F55036.svg?style=for-the-badge&logo=meta&logoColor=white)](https://groq.com/)
+[![Render](https://img.shields.io/badge/Render-Deployed-46E3B7.svg?style=for-the-badge&logo=render&logoColor=black)](https://respiguard-backend.onrender.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+<p align="center">
+  <b>An end-to-end Cyber-Physical Healthcare System combining physical hardware sensing (Plantower PMS5003 laser particulate counter, DHT22, Winsen MQ-135), leak-free hierarchical machine learning forecasting, dynamic TreeSHAP explainability, Open-Meteo atmospheric intelligence, and AES-256 encrypted telemedicine for precision asthma risk management.</b>
+</p>
+
+</div>
 
 ---
 
