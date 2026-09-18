@@ -422,6 +422,8 @@ class TelemetryInput(BaseModel):
     age_range: Optional[str] = Field("18-29yo", description="Age range")
     sex: Optional[str] = Field("male", description="Biological sex (male, female)")
     pef_best: Optional[float] = Field(520.0, description="Personal best peak flow in L/min")
+    max_pef_expected: Optional[float] = Field(None, description="Expected baseline peak expiratory flow proxy in L/min")
+    mode: Optional[str] = Field(None, description="Pipeline mode ('mode_a_pure_sensor' or 'mode_b_calibrated_profile')")
 
 class SatelliteEnvironmentalInput(BaseModel):
     user_id: Optional[str] = Field(None, description="User UUID")
@@ -1110,7 +1112,23 @@ def predict_and_explain(telemetry: TelemetryInput):
         )
 
     try:
-        explanation = xai_service.explain_prediction(telemetry.dict())
+        t_dict = telemetry.dict()
+        if telemetry.user_id:
+            try:
+                user_profile = db_service.get_user_by_id(telemetry.user_id)
+                if user_profile:
+                    t_dict['has_patient_profile'] = True
+                    if user_profile.get('pef_best'):
+                        t_dict['max_pef_expected'] = float(user_profile['pef_best'])
+                    if user_profile.get('sex'):
+                        t_dict['sex'] = user_profile['sex']
+                    if user_profile.get('age'):
+                        t_dict['age'] = user_profile['age']
+                    if user_profile.get('age_range'):
+                        t_dict['age_range'] = user_profile['age_range']
+            except Exception:
+                pass
+        explanation = xai_service.explain_prediction(t_dict)
         return explanation
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1198,6 +1216,22 @@ async def ingest_telemetry(
 
     # 4. Prepare complete telemetry payload with outdoor ambient & satellite breakdown
     t_dict = telemetry.dict()
+    if telemetry.user_id:
+        try:
+            user_profile = db_service.get_user_by_id(telemetry.user_id)
+            if user_profile:
+                t_dict['has_patient_profile'] = True
+                if user_profile.get('pef_best'):
+                    t_dict['max_pef_expected'] = float(user_profile['pef_best'])
+                if user_profile.get('sex'):
+                    t_dict['sex'] = user_profile['sex']
+                if user_profile.get('age'):
+                    t_dict['age'] = user_profile['age']
+                if user_profile.get('age_range'):
+                    t_dict['age_range'] = user_profile['age_range']
+        except Exception:
+            pass
+
     if t_dict.get('outdoor_temperature') is None and latest_satellite_state:
         t_dict['outdoor_temperature'] = latest_satellite_state.get('outdoor_temperature')
         t_dict['outdoor_humidity'] = latest_satellite_state.get('outdoor_humidity')
@@ -1212,7 +1246,7 @@ async def ingest_telemetry(
         t_dict['latitude'] = latest_satellite_state.get('latitude')
         t_dict['longitude'] = latest_satellite_state.get('longitude')
 
-    # Run 2-Stage ML prediction
+    # Run Dual-Pipeline ML prediction
     prediction = xai_service.explain_prediction(t_dict)
 
     # 5. Atomic Single-Transaction Monotonic CAS & Reading Insertion into Database

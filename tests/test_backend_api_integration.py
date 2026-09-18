@@ -254,3 +254,49 @@ def test_telemetry_latest_polling_and_staleness():
     assert env["status"] == "STATUS_SENSOR_OFFLINE_STALE"
     assert env["ahi"] is None
     assert env["is_valid"] is False
+
+
+# ==============================================================================
+# 4. DUAL-PIPELINE ENGINE INTEGRATION (MODE A & MODE B)
+# ==============================================================================
+
+def test_dual_pipeline_mode_a_anonymous_telemetry():
+    """Verifies that anonymous raw sensor telemetry routes to Mode A with pure 4 sensors."""
+    resp = client.post("/api/predict", json={
+        "temperature": 23.0,
+        "humidity": 65.0,
+        "pm1_0": 8.0,
+        "pm2_5": 14.0,
+        "pm10": 20.0
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["pipeline_mode"] == "mode_a_pure_sensor"
+    assert data["provenance"]["pipeline_mode"] == "mode_a_pure_sensor"
+    assert set(data["provenance"]["feature_schema"]) == {"temperature", "humidity", "pm2_5", "pm10"}
+    assert "probabilities" in data
+    assert "Green" in data["probabilities"]
+    assert "Yellow" in data["probabilities"]
+    assert "Red" in data["probabilities"]
+
+
+def test_dual_pipeline_mode_b_calibrated_profile():
+    """Verifies that enrolled patient profile telemetry routes to Mode B with 7 features."""
+    resp = client.post("/api/predict", json={
+        "temperature": 23.0,
+        "humidity": 65.0,
+        "pm1_0": 8.0,
+        "pm2_5": 14.0,
+        "pm10": 20.0,
+        "max_pef_expected": 490.0,
+        "age_range": "30-39yo",
+        "sex": "female"
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["pipeline_mode"] == "mode_b_calibrated_profile"
+    assert data["provenance"]["pipeline_mode"] == "mode_b_calibrated_profile"
+    expected_feats = {"temperature", "humidity", "pm2_5", "pm10", "max_pef_expected", "age_range", "sex"}
+    assert set(data["provenance"]["feature_schema"]) == expected_feats
+    assert len(data["feature_impacts"]) == 7
+

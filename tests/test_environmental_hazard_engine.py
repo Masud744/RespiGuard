@@ -590,6 +590,74 @@ def test_nws_benchmarks():
 
 
 # =============================================================================
+# 11. COMPOSITE THERMAL-STRESS & APPARENT TEMPERATURE TESTS (EXP-TUNE-05)
+# =============================================================================
+def test_apparent_temperature_steadman():
+    """Verifies BOM / Steadman Apparent Temperature psychrometric formula."""
+    # Room conditions: 25C, 50% RH -> ~26.2C
+    at_room = MetrologyEngine.calculate_apparent_temperature(25.0, 50.0)
+    assert at_room is not None
+    assert 25.5 <= at_room <= 27.0
+
+    # Cold conditions: 5C, 88% RH -> ~3.5C
+    at_cold = MetrologyEngine.calculate_apparent_temperature(5.0, 88.0)
+    assert at_cold is not None
+    assert 2.5 <= at_cold <= 4.5
+
+    # Extreme sub-freezing sensation: 1.75C, 92% RH -> < 0.5C
+    at_freezing = MetrologyEngine.calculate_apparent_temperature(1.75, 92.0)
+    assert at_freezing is not None
+    assert at_freezing < 0.5
+
+    # Input validation rejection
+    assert MetrologyEngine.calculate_apparent_temperature(None, 50.0) is None
+    assert MetrologyEngine.calculate_apparent_temperature(25.0, 150.0) is None
+
+
+def test_cold_stress_index_physiological_bounds():
+    """Verifies Cold-Induced Airway Thermal Stress Index bounds and scaling."""
+    # Warm baseline (>= 18C): Zero cold stress
+    assert MetrologyEngine.calculate_cold_stress_index(25.0, 50.0) == 0.0
+    assert MetrologyEngine.calculate_cold_stress_index(18.0, 80.0) == 0.0
+
+    # Mild cold (12C, 60% RH): Moderate strain [15.0, 30.0]
+    csi_mild = MetrologyEngine.calculate_cold_stress_index(12.0, 60.0)
+    assert 15.0 <= csi_mild <= 30.0
+
+    # Patient 343 median conditions (5.0C, 88% RH): Severe strain [65.0, 85.0]
+    csi_343 = MetrologyEngine.calculate_cold_stress_index(5.0, 88.0)
+    assert 65.0 <= csi_343 <= 85.0
+
+    # Extreme near-freezing (1.75C, 95% RH): Clamped at 100.0
+    csi_extreme = MetrologyEngine.calculate_cold_stress_index(1.75, 95.0)
+    assert csi_extreme == 100.0
+
+    # Rejection of invalid types
+    assert MetrologyEngine.calculate_cold_stress_index(None, 50.0) == 0.0
+    assert MetrologyEngine.calculate_cold_stress_index(10.0, -10.0) == 0.0
+
+
+def test_thermal_hazard_score_profile():
+    """Verifies unified thermal hazard profile dictionary and category categorization."""
+    # Cold stress profile (Patient 343)
+    res_cold = MetrologyEngine.calculate_thermal_hazard_score(4.5, 90.0)
+    assert res_cold["status"] == "OK"
+    assert res_cold["cold_stress_index"] > 70.0
+    assert res_cold["thermal_category"] == "Severe Cold Stress"
+
+    # Thermal comfort profile
+    res_comfort = MetrologyEngine.calculate_thermal_hazard_score(24.0, 50.0)
+    assert res_comfort["status"] == "OK"
+    assert res_comfort["cold_stress_index"] == 0.0
+    assert res_comfort["thermal_category"] == "Thermal Comfort Zone"
+
+    # Heat stress profile
+    res_heat = MetrologyEngine.calculate_thermal_hazard_score(36.0, 75.0)
+    assert res_heat["status"] == "OK"
+    assert res_heat["thermal_category"] in ["Elevated Heat Stress", "Extreme Heat Danger"]
+
+
+# =============================================================================
 # STANDALONE TEST RUNNER FOR EXPLICIT OUTPUT REPORTING
 # =============================================================================
 def run_standalone_suite():

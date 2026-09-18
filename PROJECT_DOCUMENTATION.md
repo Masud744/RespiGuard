@@ -379,6 +379,7 @@ $$\mathcal{L}_{\text{Stage 2}}(\phi) = \sum_{i \in \text{AtRisk}} l(\hat{y}_i, y
 | **`EXP-TUNE-02`** | Two-Stage (CV-Tuned $\tau_1=0.35, \tau_2=0.25$) | 4 Sensors | 50.68% | 45.52% | **0/4 (0.0%)** | ৫-ফোল্ড গ্রুপ সিভি থ্রেশহোল্ডে ম্যাক্রো F1 বেড়ে ০.৩৩৩১-এ পৌঁছায়। |
 | **`EXP-TUNE-03`** | Two-Stage (Regularized Depth=3/4, L2=5.0) | 4 Sensors | 48.40% | 49.66% | **0/4 (0.0%)** | অগভীর ট্রি এবং L2 পেনাল্টি ওভারফিটিং কমায়। |
 | **`EXP-TUNE-04`** | Two-Stage (Sensors + Intake Covariates) | 7 Features | 49.77% | **79.66%** | **0/2 (0.0%)** | পরিচিত রোগীর দীর্ঘমেয়াদী ক্রোনোলজিক্যাল ট্র্যাকিংয়ে অ্যাকুরেসি ৭৯.৬৬% এবং ম্যাক্রো F1 ০.৫৪১৩-এ উন্নীত হয়। |
+| **`EXP-TUNE-05`** | Thermal-Stress Augmented (`CSI` + `Apparent Temp`) | 6 Features | 52.05% | 53.10% | **0/4 (0.0%)** | তীব্র শীতকালীন কোল্ড-এয়ার ব্রঙ্কোস্পাজম আইসোলেশন ও সেফগার্ড; ম্যাক্রো F1 ০.৩৪১। |
 
 ---
 
@@ -413,6 +414,8 @@ $$\mathcal{L}_{\text{Stage 2}}(\phi) = \sum_{i \in \text{AtRisk}} l(\hat{y}_i, y
 | `datasets/generated/asthma_risk_dataset.csv` | 67,727 B | `728384aca5231f07bdbc30818f5ce45d10b41b5e5e7061cb10bfe64e22a8cb1a` | মূল প্রাইমারি ডাটা ফাইল |
 | `datasets/generated/asthma_risk_corrected_audit.csv` | 177,094 B | `3b390f4506f23cca373ed3c4eb29b9b1b1f29da55ecd241323f4e2c9d9d07581` | লিক-মুক্ত ফ্রোজেন কারেক্টেড অডিট ডাটা |
 | `models/two_stage_asthma_model.joblib` | 481,639 B | `a4e78c14d214f91c14e106fd2c10f4f10487244fa24bb691ec88ce4b401bb52a` | সংরক্ষিত প্রোডাকশন মডেল (কোয়ারেন্টাইনড) |
+| `models/leak_free_4sensor_model.joblib` | 247,359 B | `10b9fd24281826400e021a517ab11bbe32330c0a67eedabcd802ade8ed721e1b` | মোড এ প্রোডাকশন মডেল (৪ ফিজিক্যাল সেন্সর, ০% ফলস নেগেটিভ) |
+| `models/calibrated_7feature_model.joblib` | 307,279 B | `01f6c7c3f6f5835700b702991dd63727397afb5b462420b7406adc67c83150e0` | মোড বি প্রোডাকশন মডেল (৭ ফিচার টেলিহেলথ, ৭৯.৬৬% অ্যাকুরেসি) |
 | `models/random_forest_asthma.joblib` | 3,787,825 B | `ddbbe59216c4f391b9f4e149d35a123dfe9fe757cb5b44773af93d27e7c1ebb9` | প্রোডাকশন র‍্যান্ডম ফরেস্ট আর্টিফ্যাক্ট |
 | `scratch/audit_verification_phase3.py` | 17,904 B | `a0cc1915b7409c6a9d4505c466a11fb6a8229fea83abe3ef07a89db11470047e` | পোর্টেবল ডেটাসেট জেনারেটর ও অডিট স্ক্রিপ্ট |
 | `scratch/reproduce_chronological_split.py` | 9,943 B | `d9f238e09b0b5108d7dc9f771f9e3b71f0c6b9aa5badea75834df6f13aa3bdc4` | পোর্টেবল ক্রোনোলজিক্যাল সেফগার্ড স্ক্রিপ্ট |

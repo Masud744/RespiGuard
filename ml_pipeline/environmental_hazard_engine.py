@@ -195,6 +195,87 @@ class MetrologyEngine:
         return max(m_heat, m_cold)
 
     @staticmethod
+    def calculate_apparent_temperature(T_c, RH, wind_speed_mps=0.0):
+        """
+        Calculates Australian Bureau of Meteorology (BOM) Apparent Temperature
+        based on Steadman (1984) psychrometric formulas.
+        e = (RH / 100) * 6.105 * exp((17.27 * T_c) / (237.7 + T_c))
+        AT = T_c + 0.33 * e - 0.70 * v - 4.00
+        """
+        valid_t, T_c_val, err_t = MetrologyEngine.validate_numeric(T_c, "temp", -40.0, 60.0)
+        if not valid_t:
+            return None
+        valid_rh, RH_val, err_rh = MetrologyEngine.validate_numeric(RH, "rh", 0.0, 100.0)
+        if not valid_rh:
+            return None
+        v = float(wind_speed_mps) if isinstance(wind_speed_mps, (int, float)) and not math.isnan(wind_speed_mps) else 0.0
+
+        # Vapor pressure (hPa)
+        e = (RH_val / 100.0) * 6.105 * math.exp((17.27 * T_c_val) / (237.7 + T_c_val))
+        at = T_c_val + 0.33 * e - 0.70 * v - 4.00
+        return round(at, 2)
+
+    @staticmethod
+    def calculate_cold_stress_index(T_c, RH):
+        """
+        Composite Cold-Induced Airway Thermal Stress Index (EXP-TUNE-05).
+        Quantifies respiratory thermal strain and airway mucosal cooling below 18°C.
+        Non-linear power scaling (power 1.5) with relative humidity damping/convective factor.
+        Returns float in [0.0, 100.0].
+        """
+        valid_t, T_c_val, err_t = MetrologyEngine.validate_numeric(T_c, "temp", -40.0, 60.0)
+        if not valid_t:
+            return 0.0
+        valid_rh, RH_val, err_rh = MetrologyEngine.validate_numeric(RH, "rh", 0.0, 100.0)
+        if not valid_rh:
+            return 0.0
+
+        if T_c_val >= 18.0:
+            return 0.0
+
+        delta_t = 18.0 - T_c_val
+        rh_factor = 1.0 + 0.25 * max(0.0, (RH_val - 50.0) / 50.0)
+        raw_csi = ((delta_t / 18.0) ** 1.5) * 100.0 * rh_factor
+        return round(min(100.0, max(0.0, raw_csi)), 2)
+
+    @staticmethod
+    def calculate_thermal_hazard_score(T_c, RH, wind_speed_mps=0.0):
+        """
+        Unified Thermal Hazard Profile combining NOAA Heat Index, BOM Apparent
+        Temperature, and Cold-Induced Bronchial Thermal Strain Index.
+        """
+        hi_res = MetrologyEngine.calculate_heat_index(T_c, RH)
+        at_val = MetrologyEngine.calculate_apparent_temperature(T_c, RH, wind_speed_mps=wind_speed_mps)
+        csi_val = MetrologyEngine.calculate_cold_stress_index(T_c, RH)
+
+        if hi_res.get("status") != "OK":
+            return {"status": hi_res.get("status"), "error": hi_res.get("error")}
+
+        hi_c = hi_res.get("HI_c", 0.0)
+        if csi_val >= 70.0:
+            category = "Severe Cold Stress"
+        elif csi_val >= 35.0:
+            category = "Moderate Cold Stress"
+        elif csi_val > 0.0:
+            category = "Mild Cold Thermal Strain"
+        elif hi_c >= 40.0:
+            category = "Extreme Heat Danger"
+        elif hi_c >= 32.0:
+            category = "Elevated Heat Stress"
+        else:
+            category = "Thermal Comfort Zone"
+
+        return {
+            "status": "OK",
+            "T_c": hi_res["T_c"],
+            "RH": hi_res["RH"],
+            "heat_index": hi_res,
+            "apparent_temperature": at_val,
+            "cold_stress_index": csi_val,
+            "thermal_category": category
+        }
+
+    @staticmethod
     def calculate_pm_subindex(c_dry, pollutant="PM2.5"):
         """
         Calculates particulate sub-index using continuous, contiguous half-open intervals.
