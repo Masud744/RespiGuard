@@ -16,7 +16,7 @@ def test_copilot_tools_schema_definition():
     tool_names = [t["function"]["name"] for t in COPILOT_TOOLS]
     expected_tools = [
         "get_live_telemetry_and_sensors",
-        "get_outdoor_and_satellite_air_quality",
+        "get_outdoor_and_open_meteo_air_quality",
         "get_xai_clinical_risk_and_shap",
         "get_medications_and_schedule",
         "log_medication_dose",

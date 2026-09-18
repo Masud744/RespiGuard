@@ -143,9 +143,18 @@ ALLOWED_ORIGINS = [
     "https://staging.respiguard.ai"
 ]
 
+# Dynamically add custom frontend origins from environment variables (e.g. Render deployments)
+extra_origins = os.getenv("CORS_ORIGINS", "") or os.getenv("FRONTEND_URL", "")
+if extra_origins:
+    for orig in extra_origins.split(","):
+        orig_clean = orig.strip().rstrip("/")
+        if orig_clean and orig_clean not in ALLOWED_ORIGINS:
+            ALLOWED_ORIGINS.append(orig_clean)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*(\.onrender\.com|\.trycloudflare\.com)",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -583,6 +592,7 @@ def read_root():
         "database": "Staging PostgreSQL connected" if db_service.use_postgres else "Supabase REST connected"
     }
 
+@app.get("/health")
 @app.get("/api/health")
 def get_health():
     features = (

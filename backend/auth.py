@@ -436,6 +436,31 @@ def decode_refresh_token(token: str, check_revocation: bool = False) -> Dict[str
 # CSRF Defense & Exact Origin Validation
 # ==============================================================================
 
+def is_origin_authorized(candidate_uri: str) -> bool:
+    """Checks if candidate URI matches allowed origin tuples, onrender.com, trycloudflare.com, or env vars."""
+    try:
+        parsed = urlsplit(candidate_uri)
+        scheme = parsed.scheme.lower()
+        hostname = parsed.hostname.lower() if parsed.hostname else ""
+        port = parsed.port or (443 if scheme == "https" else 80)
+        origin_tuple = (scheme, hostname, port)
+        if origin_tuple in ALLOWED_ORIGIN_TUPLES:
+            return True
+        if scheme == "https" and (hostname.endswith(".onrender.com") or hostname.endswith(".trycloudflare.com")):
+            return True
+        extra_env = (os.getenv("FRONTEND_URL", "") + "," + os.getenv("CORS_ORIGINS", "")).strip(",")
+        for orig in extra_env.split(","):
+            orig = orig.strip().rstrip("/")
+            if orig:
+                p = urlsplit(orig)
+                p_host = p.hostname.lower() if p.hostname else ""
+                p_port = p.port or (443 if p.scheme.lower() == "https" else 80)
+                if (p.scheme.lower(), p_host, p_port) == (scheme, hostname, port):
+                    return True
+        return False
+    except Exception:
+        return False
+
 def validate_csrf_and_origin(
     origin: Optional[str],
     referer: Optional[str],
@@ -462,20 +487,12 @@ def validate_csrf_and_origin(
             detail="Forbidden: Missing Origin and Referer headers"
         )
 
-    try:
-        parsed = urlsplit(candidate_uri)
-        scheme = parsed.scheme.lower()
-        hostname = parsed.hostname.lower() if parsed.hostname else ""
-        port = parsed.port or (443 if scheme == "https" else 80)
-        origin_tuple = (scheme, hostname, port)
-    except Exception:
-        raise HTTPException(status_code=403, detail="Forbidden: Malformed Origin/Referer URI")
-
-    if origin_tuple not in ALLOWED_ORIGIN_TUPLES:
+    if not is_origin_authorized(candidate_uri):
         raise HTTPException(
             status_code=403,
             detail=f"Forbidden: Origin '{candidate_uri}' is not authorized"
         )
+
 
 # ==============================================================================
 # FastAPI Authentication Dependencies

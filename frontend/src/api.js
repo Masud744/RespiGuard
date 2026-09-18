@@ -1,6 +1,10 @@
-const API_BASE = (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
-  ? 'https://vocational-pipeline-bytes-ensures.trycloudflare.com/api'
-  : 'http://127.0.0.1:8000/api';
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const API_BASE = rawApiUrl
+  ? (rawApiUrl.replace(/\/+$/, '').endsWith('/api') ? rawApiUrl.replace(/\/+$/, '') : `${rawApiUrl.replace(/\/+$/, '')}/api`)
+  : (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+    ? 'https://vocational-pipeline-bytes-ensures.trycloudflare.com/api'
+    : 'http://127.0.0.1:8000/api';
+
 
 /**
  * Normalizes backend error responses (string, array of validation objects, error objects)

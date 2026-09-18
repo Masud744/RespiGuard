@@ -1093,9 +1093,9 @@ You MUST match the exact language and script of the user's prompt:
             "message dao", "text koro", "message doctor", "daktar k bolo", "doctor k bolo",
             "message pathao", "text send", "hello bolo", "helo bolo", "hello send", "helo send", "send korte parbe"
         ])
-        is_affirmation = q.strip() in [
+        is_affirmation = q.strip().rstrip("?.!").strip() in [
             "deo", "send koro", "pathao", "ha pathao", "haa pathao", "yes send", "send",
-            "bolo", "message deo", "ha deo", "haa deo", "ok send", "ha bolo"
+            "bolo", "message deo", "ha deo", "haa deo", "ok send", "ha bolo", "yes", "ha", "haa"
         ]
 
         recent_doctor_context = False
