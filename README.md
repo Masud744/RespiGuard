@@ -63,7 +63,7 @@
 9. [Project & Repository Structure](#9-project--repository-structure)
 10. [Deployment Architecture (Render & Production Cloud)](#10-deployment-architecture-render--production-cloud)
 11. [Security & Cryptographic Architecture](#11-security--cryptographic-architecture)
-12. [Complete Visual Demonstration Gallery (All 12 Production Captures)](#12-complete-visual-demonstration-gallery-all-12-production-captures)
+12. [Complete Visual Demonstration Gallery (All 16 Production Captures)](#12-complete-visual-demonstration-gallery-all-16-production-captures)
 13. [Author & Contact Information](#13-author--contact-information)
 14. [License](#14-license)
 
@@ -243,6 +243,23 @@ Where $PM_{2.5, \text{thresh}} = 35.0\text{ }\mu\text{g/m}^3$ and $PM_{10, \text
 - **Winsen MQ-135:** Operating on ADC1 ensures no conflict with Wi-Fi functionality. Internal calibration parameters: load resistance $R_L = 10.0\text{ k}\Omega$, clean air resistance $R_0 = 76.6\text{ k}\Omega$.
 - **SSD1306 OLED:** Displays live local temperature, relative humidity, $PM_{2.5}$, and cloud synchronization status directly on device hardware.
 
+### Physical Prototype Implementation & Sensor Rig
+
+| Top-Down Prototype Circuit Layout | Front Elevation Sensor Array |
+| :---: | :---: |
+| ![Physical Hardware Prototype Breadboard](Screenshots/13_hardware_prototype_rig.jpeg) | ![Active Sensor Array Front View](Screenshots/14_hardware_sensor_array_front.jpeg) |
+| *Figure 6: Top-down circuit view of the physical prototype featuring ESP32 NodeMCU, Plantower PMS5003 laser particulate counter, DHT22 ambient probe, and Winsen MQ-135 sensor on breadboard.* | *Figure 7: Front elevation showing horizontal alignment of the laser optical scattering chamber, humidity grille, and gas sensor head.* |
+
+| Macro Detail of Active Sensor Array |
+| :---: |
+| ![Macro Detail of Active Hardware Prototype](Screenshots/15_hardware_sensor_array_macro.jpeg) |
+| *Figure 8: Close-up macro detail of the physical sensor array under active 5V USB power delivery and serial telemetry acquisition.* |
+
+### Live Cyber-Physical Telemetry Integration (Hardware Serial Stream vs. Web Dashboard)
+
+![Live IoT Serial Telemetry Split Screen](Screenshots/16_live_iot_serial_telemetry_split.png)
+*Figure 9: End-to-end cyber-physical telemetry validation: (Right) Arduino IDE Serial Monitor connected via `/dev/ttyUSB0` at 115200 baud streaming raw sensor packets (Seq #43, 33.2°C, 76.3% RH, PM2.5 15.0 µg/m³, MQ-135 423.5 ppm); (Left) Synchronized RespiGuard.ai live web dashboard displaying instantaneous Green Zone AI inference (67.9% confidence).*
+
 ---
 
 ## 7. Installation & Local Setup Guide
@@ -415,7 +432,7 @@ RespiGuard/
 
 ---
 
-## 12. Complete Visual Demonstration Gallery (All 12 Production Captures)
+## 12. Complete Visual Demonstration Gallery (All 16 Production Captures)
 
 ### 12.1 Real-Time Metrology & System Monitoring
 | Master Telemetry Dashboard |
@@ -458,6 +475,17 @@ RespiGuard/
 | :---: | :---: | :---: | :---: |
 | ![Login Portal](Screenshots/01_login_portal.png) | ![Patient Registration](Screenshots/02_patient_registration.png) | ![Doctor Registration](Screenshots/03_doctor_registration.png) | ![Email OTP](Screenshots/04_email_otp_verification.png) |
 | *Figure 14: JWT Authentication* | *Figure 15: Multi-Step Patient Flow* | *Figure 16: Specialist Credentials* | *Figure 17: Gmail OTP Verification* |
+
+### 12.8 Physical Hardware Prototype & Live Serial Integration
+| Hardware Breadboard Rig | Front Sensor Array Elevation | Active Sensor Rig Detail |
+| :---: | :---: | :---: |
+| ![Hardware Rig](Screenshots/13_hardware_prototype_rig.jpeg) | ![Sensor Array](Screenshots/14_hardware_sensor_array_front.jpeg) | ![Macro Sensor Rig](Screenshots/15_hardware_sensor_array_macro.jpeg) |
+| *Figure 18: Physical Prototype Layout* | *Figure 19: Sensor Array Elevation* | *Figure 20: Active Hardware Under Power* |
+
+| Live Cyber-Physical Hardware-to-Dashboard Telemetry Stream |
+| :---: |
+| ![Live IoT Serial Telemetry Split](Screenshots/16_live_iot_serial_telemetry_split.png) |
+| *Figure 21: Synchronized split-screen showing ESP32 Arduino serial telemetry streaming live packets to the RespiGuard.ai web dashboard.* |
 
 ---
 
